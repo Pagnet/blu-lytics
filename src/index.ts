@@ -1,2 +1,2 @@
-export { initialize } from './initializers/initializers';
-export { sendScreenEvent } from './providers/providers';
+export { initialize } from './initializers';
+export { sendScreenEvent } from './dispatchers';
