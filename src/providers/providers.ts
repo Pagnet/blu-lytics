@@ -19,7 +19,6 @@ export const setup = (provider: ProviderType): void => {
     )
   ) {
     providersList.push(provider);
-    console.info(`Provider ${provider.name} added`);
   } else {
     throw BluefinErrors.CannotAddProviderTwice;
   }
