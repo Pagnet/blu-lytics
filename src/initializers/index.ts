@@ -7,7 +7,7 @@ import { BrowserTracing } from '@sentry/tracing';
 import { CaptureConsole } from '@sentry/integrations';
 import { IInitializeParams, EnvironmentType } from './initializers.types';
 
-const consoleInitializer = (enviroment: EnvironmentType, providerName: string): void => {
+const initializeConsole = (enviroment: EnvironmentType, providerName: string): void => {
   if (enviroment === 'development') {
     console.log(`%c${providerName} initialized using bluefin`, 'color: red;');
   }
@@ -16,7 +16,7 @@ const consoleInitializer = (enviroment: EnvironmentType, providerName: string): 
 const fullStoryInitializer = (environment: EnvironmentType, orgId: string): void => {
   init({ orgId, devMode: environment !== 'production' });
 
-  consoleInitializer(environment, 'FullStory');
+  initializeConsole(environment, 'FullStory');
 };
 
 const mixPanelInitializer = (environment: EnvironmentType, token: string): void => {
@@ -26,10 +26,11 @@ const mixPanelInitializer = (environment: EnvironmentType, token: string): void 
     persistence: 'localStorage',
   });
 
-  consoleInitializer(environment, 'MixpanelProvider');
+  initializeConsole(environment, 'MixpanelProvider');
 };
 
-const sentryInitializer = (environment: EnvironmentType, dsn: string): void => {
+const sentryInitializer = (environment: EnvironmentType, dsn: string, tracesSampleRate: number):
+void => {
   Sentry.init({
     dsn,
     integrations: [
@@ -39,7 +40,7 @@ const sentryInitializer = (environment: EnvironmentType, dsn: string): void => {
       }),
     ],
     environment,
-    tracesSampleRate: 0.2,
+    tracesSampleRate,
     initialScope: {
       tags: {
         environment,
@@ -47,13 +48,13 @@ const sentryInitializer = (environment: EnvironmentType, dsn: string): void => {
     },
   });
 
-  consoleInitializer(environment, 'SentryProvider');
+  initializeConsole(environment, 'SentryProvider');
 };
 
 export const initialize = (paramsArray: IInitializeParams | IInitializeParams[]): void => {
   const initializeProvider = (params: IInitializeParams): void => {
     const {
-      providerName, environment, dsn = '', token = '', orgId = '',
+      providerName, environment, dsn = '', token = '', orgId = '', tracesSampleRate = 0.1,
     } = params;
 
     switch (providerName) {
@@ -61,7 +62,7 @@ export const initialize = (paramsArray: IInitializeParams | IInitializeParams[])
         fullStoryInitializer(environment, orgId);
         break;
       case 'SentryProvider':
-        sentryInitializer(environment, dsn);
+        sentryInitializer(environment, dsn, tracesSampleRate);
         break;
       case 'MixpanelProvider':
         mixPanelInitializer(environment, token);
