@@ -7,17 +7,31 @@ import { BrowserTracing } from '@sentry/tracing';
 import { CaptureConsole } from '@sentry/integrations';
 import { IInitializeParams, EnvironmentType } from './initializers.types';
 
-const initializeConsole = (enviroment: EnvironmentType, providerName: string): void => {
-  if (enviroment === 'development') {
+const initializeConsole = (environment: EnvironmentType, providerName: string): void => {
+  if (environment === 'development') {
     console.log(`%c${providerName} initialized using bluefin`, 'color: red;');
   }
 };
+
+/**
+ * Initializes FullStory for error tracking in a web environment.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @param {string} orgId - The FullStory organization ID.
+ * @returns {void}
+ */
 
 const fullStoryInitializer = (environment: EnvironmentType, orgId: string): void => {
   init({ orgId, devMode: environment !== 'production' });
 
   initializeConsole(environment, 'FullStory');
 };
+
+/**
+ * Initializes MixPanel for error tracking in a web environment.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @param {string} token - The MixPanel project token.
+ * @returns {void}
+ */
 
 const mixPanelInitializer = (environment: EnvironmentType, token: string): void => {
   mixpanel.init(token, {
@@ -29,8 +43,24 @@ const mixPanelInitializer = (environment: EnvironmentType, token: string): void 
   initializeConsole(environment, 'MixpanelProvider');
 };
 
-const sentryInitializer = (environment: EnvironmentType, dsn: string, tracesSampleRate: number):
+/**
+ * Initializes Sentry for error tracking in a web environment.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @param {string} dsn - The Sentry DSN (Data Source Name).
+ * @param {number} tracesSampleRate - The percentage of transactions to be sampled (0 to 1).
+ * @returns {void}
+ */
+
+const sentryInitializer = (
+  environment: EnvironmentType,
+  dsn: string,
+  tracesSampleRate: number = 0.5,
+):
 void => {
+  if (tracesSampleRate < 0 || tracesSampleRate > 1) {
+    throw new Error('tracesSampleRate must be in the range [0, 1]');
+  }
+
   Sentry.init({
     dsn,
     integrations: [
@@ -51,6 +81,11 @@ void => {
   initializeConsole(environment, 'SentryProvider');
 };
 
+/**
+ * Initializes error tracking providers based on the given parameters.
+ * @param {IInitializeParams | IInitializeParams[]} paramsArray - Parameters for initialization.
+ * @returns {void}
+ */
 export const initialize = (paramsArray: IInitializeParams | IInitializeParams[]): void => {
   const initializeProvider = (params: IInitializeParams): void => {
     const {
