@@ -1,20 +1,29 @@
-import { BluefinErrorType, ProviderType } from './provider.types';
+import { ProviderType } from './provider.types';
+import SentryProvider from './setups/sentry';
 
-const BluefinErrors: Record<BluefinErrorType, string> = {
-  CannotAddProviderTwice: 'Cannot add the same provider twice.',
-};
+/**
+ * An array containing the default provider(s).
+ */
+const providersDefault: ProviderType[] = [SentryProvider];
+/**
+ * An array containing the list of providers, initialized with the default provider(s).
+ */
+const providersList: ProviderType[] = [...providersDefault];
 
-const providersList: ProviderType[] = [];
-
+/**
+ * Adds or updates a provider in the providers list.
+ *
+ * @param provider - The provider to be added or updated.
+ */
 const setup = (provider: ProviderType): void => {
-  if (
-    providersList.every(
-      (existingProvider) => existingProvider.name !== provider.name,
-    )
-  ) {
-    providersList.push(provider);
+  const existingIndex = providersList.findIndex(
+    (existingProvider) => existingProvider.name === provider.name,
+  );
+
+  if (existingIndex !== -1) {
+    providersList[existingIndex] = provider;
   } else {
-    throw BluefinErrors.CannotAddProviderTwice;
+    providersList.unshift(provider);
   }
 };
 
