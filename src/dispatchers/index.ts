@@ -1,25 +1,78 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 import { providersList } from '../providers';
 import { isValidProvidersList } from '../utils';
-import { EventType, PropertiesType, UserPropertiesType } from './dispatchers.types';
+import { PropertiesType, UserPropertiesType } from './dispatchers.types';
 
-const sendEvent = (
-  event: string,
-  eventType: EventType,
-  properties?: PropertiesType,
-  userProperties?: UserPropertiesType,
-): void => {
+// export const sendEvent1 = (screen: string): void => {
+//   if (!isValidProvidersList(providersList)) {
+//     return;
+//   }
+//   providersList
+//     .filter((provider) => provider.screenEvent)
+//     .forEach((provider) => provider.screenEvent?.(screen));
+// };
+
+// export const sendEvent2 = (
+//   screen: string,
+//   properties: PropertiesType
+// ): void => {
+//   if (!isValidProvidersList(providersList)) {
+//     return;
+//   }
+//   providersList
+//     .filter((provider) => provider.customEvent)
+//     .forEach((provider) => provider.customEvent?.(screen, properties));
+// };
+
+// export const sendEvent3 = (
+//   id: string,
+//   userProperties: UserPropertiesType
+// ): void => {
+//   if (!isValidProvidersList(providersList)) {
+//     return;
+//   }
+//   providersList
+//     .filter((provider) => provider.userIdentification)
+//     .forEach((provider) => provider.userIdentification?.(id, userProperties));
+// };
+
+type EventData = {
+  screen?: string;
+  properties?: PropertiesType;
+  event?: string;
+  id?: string;
+  userProperties?: UserPropertiesType;
+};
+
+/**
+ * Dispatches the specified event data to all configured providers.
+ *
+ * @param {EventData} eventData - The data associated with the event to be dispatched.
+ * @returns {void}
+ */
+export const dispatchEventToAllProviders = (eventData: EventData): void => {
   if (!isValidProvidersList(providersList)) {
     return;
   }
 
-  const payload = eventType === 'userIdentification' ? userProperties : properties;
+  providersList.forEach((provider) => {
+    const actions = {
+      screenEvent: () => provider.screenEvent
+        && eventData.screen
+        && provider.screenEvent(eventData.screen),
+      customEvent: () => provider.customEvent
+        && eventData.event
+        && eventData.properties
+        && provider.customEvent(eventData.event, eventData.properties),
+      userIdentification: () => provider.userIdentification
+        && eventData.id
+        && eventData.userProperties
+        && provider.userIdentification(eventData.id, eventData.userProperties),
+    };
 
-  providersList
-    .filter((provider) => provider[eventType])
-    .forEach((provider) => {
-      provider[eventType]?.(event, payload);
-    });
+    Object.values(actions).forEach((action) => action());
+  });
 };
 
 /**
@@ -39,15 +92,25 @@ const sendScreenEvent = (screen: string): void => {
     return;
   }
 
-  sendEvent(screen, 'screenEvent');
+  console.log(`[BLUEFIN]: Screen event: ${screen}`);
+  dispatchEventToAllProviders({ screen });
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  sendEvent(event, 'customEvent', properties);
+  console.log(
+    `[BLUEFIN]: Custom event: ${event} - ${JSON.stringify(properties)}`,
+  );
+  dispatchEventToAllProviders({ event, properties });
 };
 
-const sendUserIdentification = (id: string, userProperties: UserPropertiesType): void => {
-  sendEvent(id, 'userIdentification', userProperties);
+const sendUserIdentification = (
+  id: string,
+  userProperties: UserPropertiesType,
+): void => {
+  console.log(
+    `[BLUEFIN]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
+  );
+  dispatchEventToAllProviders({ id, userProperties });
 };
 
 export { sendCustomEvent, sendScreenEvent, sendUserIdentification };
