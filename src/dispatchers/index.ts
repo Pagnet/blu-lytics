@@ -4,39 +4,6 @@ import { providersList } from '../providers';
 import { isValidProvidersList } from '../utils';
 import { PropertiesType, UserPropertiesType } from './dispatchers.types';
 
-// export const sendEvent1 = (screen: string): void => {
-//   if (!isValidProvidersList(providersList)) {
-//     return;
-//   }
-//   providersList
-//     .filter((provider) => provider.screenEvent)
-//     .forEach((provider) => provider.screenEvent?.(screen));
-// };
-
-// export const sendEvent2 = (
-//   screen: string,
-//   properties: PropertiesType
-// ): void => {
-//   if (!isValidProvidersList(providersList)) {
-//     return;
-//   }
-//   providersList
-//     .filter((provider) => provider.customEvent)
-//     .forEach((provider) => provider.customEvent?.(screen, properties));
-// };
-
-// export const sendEvent3 = (
-//   id: string,
-//   userProperties: UserPropertiesType
-// ): void => {
-//   if (!isValidProvidersList(providersList)) {
-//     return;
-//   }
-//   providersList
-//     .filter((provider) => provider.userIdentification)
-//     .forEach((provider) => provider.userIdentification?.(id, userProperties));
-// };
-
 type EventData = {
   screen?: string;
   properties?: PropertiesType;
