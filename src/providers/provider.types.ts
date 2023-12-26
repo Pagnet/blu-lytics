@@ -1,10 +1,8 @@
-import { UserBluefin } from '../types/generic.types';
-
-export type BluefinErrorType = 'CannotAddProviderTwice';
+import { PropertiesType } from '../dispatchers/dispatchers.types';
 
 export type ProviderType = {
-  name: string;
-  userProperties: (user: UserBluefin) => void;
-  customEvent: (event: string) => void;
+  name: 'Sentry' | 'FullStory' | 'MixPanel';
+  userIdentification: (id: string, userProperties: any) => void;
+  customEvent: (event: string, properties: PropertiesType) => void;
   screenEvent: (screen: string) => void;
 };
