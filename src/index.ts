@@ -1,2 +1,2 @@
 export { initialize } from './initializers';
-export { sendScreenEvent } from './dispatchers';
+export { sendCustomEvent, sendScreenEvent, sendUserIdentification } from './dispatchers';
