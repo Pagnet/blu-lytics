@@ -2,6 +2,7 @@ import { ProviderType } from './provider.types';
 import SentryProvider from './setups/sentry';
 import MixPanelProvider from './setups/mixpanel';
 import FullStoryProvider from './setups/fullstory';
+import FirebaseProvider from './setups/firebase';
 
 /**
  * An array containing the default provider(s).

@@ -13,7 +13,7 @@ const initializeConsole = (
 ): void => {
   if (environment === 'development') {
     console.log(
-      `[Bluefin] ${providerName} initialized using ${environment} environment`,
+      `[BLUEFIN] ${providerName} initialized using ${environment} environment`,
     );
   }
 };
@@ -27,9 +27,9 @@ const initializeConsole = (
 
 const fullStoryInitializer = (
   environment: EnvironmentType,
-  orgId: string,
+  apiKey: string,
 ): void => {
-  init({ orgId });
+  init({ orgId: apiKey });
 
   initializeConsole(environment, 'FullStory');
 };
@@ -37,15 +37,15 @@ const fullStoryInitializer = (
 /**
  * Initializes MixPanel for error tracking in a web environment.
  * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
- * @param {string} token - The MixPanel project token.
+ * @param {string} credential - The MixPanel project token.
  * @returns {void}
  */
 
 const mixPanelInitializer = (
   environment: EnvironmentType,
-  token: string,
+  apiKey: string,
 ): void => {
-  mixpanel.init(token, {
+  mixpanel.init(apiKey, {
     debug: true,
     track_pageview: true,
     persistence: 'localStorage',
@@ -64,7 +64,7 @@ const mixPanelInitializer = (
 
 const sentryInitializer = (
   environment: EnvironmentType,
-  dsn: string,
+  apiKey: string,
   tracesSampleRate = 0.5,
 ): void => {
   if (tracesSampleRate < 0 || tracesSampleRate > 1) {
@@ -72,7 +72,7 @@ const sentryInitializer = (
   }
 
   Sentry.init({
-    dsn,
+    dsn: apiKey,
     integrations: [
       new BrowserTracing(),
       new CaptureConsole({
@@ -96,28 +96,26 @@ const sentryInitializer = (
  * @param {IInitializeParams | IInitializeParams[]} paramsArray - Parameters for initialization.
  * @returns {void}
  */
-export const initialize = (
+export const initializeProviders = (
   paramsArray: IInitializeParams | IInitializeParams[],
 ): void => {
-  const initializeProvider = (params: IInitializeParams): void => {
+  const initialize = (params: IInitializeParams): void => {
     const {
       providerName,
-      environment,
-      dsn = '',
-      token = '',
-      orgId = '',
+      environment = 'production',
       tracesSampleRate = 0.1,
+      apiKey = '',
     } = params;
 
     switch (providerName) {
       case 'FullStory':
-        fullStoryInitializer(environment, orgId);
+        fullStoryInitializer(environment, apiKey);
         break;
       case 'Sentry':
-        sentryInitializer(environment, dsn, tracesSampleRate);
+        sentryInitializer(environment, apiKey, tracesSampleRate);
         break;
       case 'MixPanel':
-        mixPanelInitializer(environment, token);
+        mixPanelInitializer(environment, apiKey);
         break;
       default:
         break;
@@ -125,8 +123,8 @@ export const initialize = (
   };
 
   if (Array.isArray(paramsArray)) {
-    paramsArray.forEach(initializeProvider);
+    paramsArray.forEach(initialize);
   } else {
-    initializeProvider(paramsArray);
+    initialize(paramsArray);
   }
 };

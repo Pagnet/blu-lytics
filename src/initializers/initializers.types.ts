@@ -1,12 +1,10 @@
-type ProviderNameType = 'Sentry' | 'FullStory' | 'MixPanel';
+type ProviderNameType = 'Sentry' | 'FullStory' | 'MixPanel' | 'Firebase';
 
 export type EnvironmentType = 'development' | 'staging' | 'production';
 
 export interface IInitializeParams {
   providerName: ProviderNameType;
-  environment: EnvironmentType;
-  dsn?: string;
-  token?: string;
-  orgId?: string;
+  environment?: EnvironmentType;
   tracesSampleRate?: number;
+  apiKey?: string;
 }
