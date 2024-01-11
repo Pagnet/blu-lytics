@@ -3,15 +3,7 @@
 import { currentProvidersEnvironment } from '../initializers';
 import { providersList } from '../providers';
 import { isValidProvidersList } from '../utils';
-import { PropertiesType, UserPropertiesType } from './dispatchers.types';
-
-type EventData = {
-  screen?: string;
-  properties?: PropertiesType;
-  event?: string;
-  id?: string;
-  userProperties?: UserPropertiesType;
-};
+import { EventData, PropertiesType, UserPropertiesType } from './dispatchers.types';
 
 /**
  * Dispatches the specified event data to all configured providers.

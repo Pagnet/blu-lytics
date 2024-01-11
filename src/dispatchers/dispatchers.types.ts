@@ -5,3 +5,10 @@ export type UserPropertiesType = {
   name?: string;
   [key: string]: string | undefined;
 };
+export type EventData = {
+  screen?: string;
+  properties?: PropertiesType;
+  event?: string;
+  id?: string;
+  userProperties?: UserPropertiesType;
+};
