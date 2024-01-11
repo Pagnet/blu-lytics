@@ -1,21 +1,31 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-mutable-exports */
 import * as Sentry from '@sentry/react';
 import { init } from '@fullstory/browser';
 import mixpanel from 'mixpanel-browser';
 import { BrowserTracing } from '@sentry/tracing';
 import { CaptureConsole } from '@sentry/integrations';
+import { clarity } from 'react-microsoft-clarity';
 import { IInitializeParams, EnvironmentType } from './initializers.types';
 
-const initializeConsole = (
+/**
+ * Checks if the environment is set to 'production'.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @returns {boolean} - True if the environment is 'production', false otherwise.
+ */
+const isProduction = (environment: EnvironmentType): boolean => environment === 'production';
+
+/**
+ * Initializes Microsoft Clarity for error tracking in a web environment.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @param {string} id - The Clarity project id.
+ * @returns {void}
+ */
+
+const clarityInitializer = (
   environment: EnvironmentType,
-  providerName: string,
+  apiKey: string,
 ): void => {
-  if (environment === 'development') {
-    console.log(
-      `[BLUEFIN] ${providerName} initialized using ${environment} environment`,
-    );
-  }
+  if (isProduction(environment)) clarity.init(apiKey);
 };
 
 /**
@@ -29,9 +39,7 @@ const fullStoryInitializer = (
   environment: EnvironmentType,
   apiKey: string,
 ): void => {
-  init({ orgId: apiKey });
-
-  initializeConsole(environment, 'FullStory');
+  if (isProduction(environment)) init({ orgId: apiKey });
 };
 
 /**
@@ -45,13 +53,12 @@ const mixPanelInitializer = (
   environment: EnvironmentType,
   apiKey: string,
 ): void => {
-  mixpanel.init(apiKey, {
-    debug: true,
-    track_pageview: true,
-    persistence: 'localStorage',
-  });
-
-  initializeConsole(environment, 'MixpanelProvider');
+  if (isProduction(environment)) {
+    mixpanel.init(apiKey, {
+      track_pageview: true,
+      persistence: 'localStorage',
+    });
+  }
 };
 
 /**
@@ -67,29 +74,38 @@ const sentryInitializer = (
   apiKey: string,
   tracesSampleRate = 0.5,
 ): void => {
-  if (tracesSampleRate < 0 || tracesSampleRate > 1) {
-    throw new Error('tracesSampleRate must be in the range [0, 1]');
-  }
-
-  Sentry.init({
-    dsn: apiKey,
-    integrations: [
-      new BrowserTracing(),
-      new CaptureConsole({
-        levels: ['warn', 'error'],
-      }),
-    ],
-    environment,
-    tracesSampleRate,
-    initialScope: {
-      tags: {
-        environment,
+  if (isProduction(environment)) {
+    if (tracesSampleRate < 0 || tracesSampleRate > 1) {
+      throw new Error('tracesSampleRate must be in the range [0, 1]');
+    }
+    Sentry.init({
+      dsn: apiKey,
+      integrations: [
+        new BrowserTracing(),
+        new CaptureConsole({
+          levels: ['warn', 'error'],
+        }),
+      ],
+      environment,
+      tracesSampleRate,
+      initialScope: {
+        tags: {
+          environment,
+        },
       },
-    },
-  });
-
-  initializeConsole(environment, 'SentryProvider');
+    });
+  }
 };
+
+/**
+ * Represents the current environment setting for providers.
+ * @type {EnvironmentType | undefined}
+ * @description This variable stores the current environment setting
+ *              used by providers. It is initially undefined and
+ *              gets updated when the `initializeProviders` function is called.
+ *              Make sure to call `initializeProviders` before accessing this value.
+ */
+let currentProvidersEnvironment: EnvironmentType | undefined;
 
 /**
  * Initializes error tracking providers based on the given parameters.
@@ -98,16 +114,20 @@ const sentryInitializer = (
  */
 export const initializeProviders = (
   paramsArray: IInitializeParams | IInitializeParams[],
+  environment: EnvironmentType = 'production',
 ): void => {
+  const initializedProviders: string[] = [];
   const initialize = (params: IInitializeParams): void => {
     const {
       providerName,
-      environment = 'production',
       tracesSampleRate = 0.1,
       apiKey = '',
     } = params;
 
     switch (providerName) {
+      case 'Clarity':
+        clarityInitializer(environment, apiKey);
+        break;
       case 'FullStory':
         fullStoryInitializer(environment, apiKey);
         break;
@@ -120,6 +140,7 @@ export const initializeProviders = (
       default:
         break;
     }
+    initializedProviders.push(providerName);
   };
 
   if (Array.isArray(paramsArray)) {
@@ -127,4 +148,9 @@ export const initializeProviders = (
   } else {
     initialize(paramsArray);
   }
+  currentProvidersEnvironment = environment;
+
+  console.log('[Bluefin] Initialized providers:', initializedProviders);
 };
+
+export { currentProvidersEnvironment };
