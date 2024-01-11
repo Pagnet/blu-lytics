@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import { currentProvidersEnvironment } from '../initializers';
 import { providersList } from '../providers';
 import { isValidProvidersList } from '../utils';
 import { PropertiesType, UserPropertiesType } from './dispatchers.types';
@@ -42,42 +43,37 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
   });
 };
 
-/**
- * Validates if the screen event name follows the specified format.
- * The format is: lowercase letters separated by underscores and limited to 40 characters.
- * @param {string} eventName - The name of the event.
- * @returns {boolean} - True if the event name is valid, false otherwise.
- */
-const isValidScreenEventName = (eventName: string): boolean => {
-  const regex = /^[a-z]+(_[a-z]+)*$/;
-  return eventName.length <= 40 && regex.test(eventName);
-};
+const isDevelopment: boolean = currentProvidersEnvironment === 'development';
 
 const sendScreenEvent = (screen: string): void => {
-  if (!isValidScreenEventName(screen)) {
-    console.error(`Invalid screen event name: ${screen}`);
-    return;
+  if (isDevelopment) {
+    console.log(`[BLUEFIN]: Screen event: ${screen}`);
+  } else {
+    dispatchEventToAllProviders({ screen });
   }
-
-  console.log(`[BLUEFIN]: Screen event: ${screen}`);
-  dispatchEventToAllProviders({ screen });
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  console.log(
-    `[BLUEFIN]: Custom event: ${event} - ${JSON.stringify(properties)}`,
-  );
-  dispatchEventToAllProviders({ event, properties });
+  if (isDevelopment) {
+    console.log(
+      `[BLUEFIN]: Custom event: ${event} - ${JSON.stringify(properties)}`,
+    );
+  } else {
+    dispatchEventToAllProviders({ event, properties });
+  }
 };
 
 const sendUserIdentification = (
   id: string,
   userProperties: UserPropertiesType,
 ): void => {
-  console.log(
-    `[BLUEFIN]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
-  );
-  dispatchEventToAllProviders({ id, userProperties });
+  if (isDevelopment) {
+    console.log(
+      `[BLUEFIN]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
+    );
+  } else {
+    dispatchEventToAllProviders({ id, userProperties });
+  }
 };
 
 export { sendCustomEvent, sendScreenEvent, sendUserIdentification };
