@@ -4,8 +4,9 @@ export const baseJestConfig: Config.InitialOptions = {
   preset: 'ts-jest',
   clearMocks: true,
   coverageDirectory: 'coverage',
-  testMatch: ['<rootDir>/tests/**/*.spec.(ts|tsx)'],
+  testMatch: ['<rootDir>/src/**/*.spec.(ts|tsx)'],
   moduleDirectories: ['node_modules', '<rootDir>/src'],
+  testEnvironment: 'jsdom',
 };
 
 const config: Config.InitialOptions = {
@@ -13,4 +14,3 @@ const config: Config.InitialOptions = {
 };
 
 export default config;
-
