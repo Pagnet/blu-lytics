@@ -1,4 +1,4 @@
-type ProviderNameType = 'Clarity' | 'Sentry' | 'FullStory' | 'MixPanel' | 'Firebase';
+export type ProviderNameType = 'Clarity' | 'Sentry' | 'FullStory' | 'MixPanel' | 'Firebase';
 
 export type EnvironmentType = 'development' | 'staging' | 'production';
 

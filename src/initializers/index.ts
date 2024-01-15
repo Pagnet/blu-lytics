@@ -150,7 +150,9 @@ export const initializeProviders = (
   }
   currentProvidersEnvironment = environment;
 
-  console.log('[Bluefin] Initialized providers:', initializedProviders);
+  if (initializedProviders.length > 0) {
+    console.log('[Bluefin] Initialized providers:', initializedProviders);
+  }
 };
 
 export { currentProvidersEnvironment };
