@@ -1,6 +1,6 @@
 import {
   initializeProviders,
-  currentProvidersEnvironment,
+  userSelectedEnvironment,
 } from './index';
 import { IInitializeParams, ProviderNameType } from './initializers.types';
 
@@ -17,13 +17,13 @@ describe('Initializers', () => {
     jest.clearAllMocks();
   });
   describe('initializeProviders', () => {
-    it('should initialize providers and update currentProvidersEnvironment', () => {
+    it('should initialize providers and update userSelectedEnvironment', () => {
       const paramsArray: IInitializeParams[] = [{ providerName: 'Mixpanel' as ProviderNameType, apiKey: 'your-api-key' }, { providerName: 'Sentry' as ProviderNameType, apiKey: 'your-api-key' }];
       const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-      initializeProviders(paramsArray, 'production');
+      initializeProviders(paramsArray, { environment: 'production' });
 
-      expect(currentProvidersEnvironment).toBe('production');
+      expect(userSelectedEnvironment).toBe('production');
       expect(logSpy).toHaveBeenCalledWith(
         '[Bluefin] Initialized providers:',
         expect.arrayContaining(['Mixpanel', 'Sentry']),
@@ -36,7 +36,7 @@ describe('Initializers', () => {
         { providerName: 'Sentry' as ProviderNameType, apiKey: 'your-api-key', tracesSampleRate: 1.5 },
       ];
 
-      expect(() => initializeProviders(paramsArray, 'production')).toThrow(
+      expect(() => initializeProviders(paramsArray, { environment: 'production' })).toThrow(
         'tracesSampleRate must be in the range [0, 1]',
       );
     });
@@ -46,7 +46,14 @@ describe('Initializers', () => {
         { providerName: 'Sentry' as ProviderNameType, apiKey: 'your-api-key', tracesSampleRate: 0.5 },
       ];
 
-      expect(() => initializeProviders(validParams, 'production')).not.toThrow();
+      expect(() => initializeProviders(validParams, { environment: 'production' })).not.toThrow();
+    });
+
+    it('should default to "production" environment if not specified in parameters', () => {
+      const paramsArray = { providerName: 'Sentry' as ProviderNameType, apiKey: 'your-api-key' };
+      initializeProviders(paramsArray);
+
+      expect(userSelectedEnvironment).toEqual('production');
     });
   });
 });
