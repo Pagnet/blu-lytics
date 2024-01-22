@@ -1,14 +1,13 @@
 import { ProviderType } from './provider.types';
-import SentryProvider from './setups/sentry';
-import MixPanelProvider from './setups/mixpanel';
-import FullStoryProvider from './setups/fullstory';
-import ClarityProvider from './setups/clarity';
+import SentryProvider from './setups/sentry/sentry';
+import MixPanelProvider from './setups/mixpanel/mixpanel';
+import FullStoryProvider from './setups/fullstory/fullstory';
+import ClarityProvider from './setups/clarity/clarity';
 
 /**
  * An array containing the default provider(s).
  */
 const providersDefault: ProviderType[] = [
-  ClarityProvider,
   SentryProvider,
   MixPanelProvider,
   FullStoryProvider,

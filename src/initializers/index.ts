@@ -74,48 +74,53 @@ const sentryInitializer = (
   apiKey: string,
   tracesSampleRate = 0.5,
 ): void => {
-  if (isProduction(environment)) {
-    if (tracesSampleRate < 0 || tracesSampleRate > 1) {
-      throw new Error('tracesSampleRate must be in the range [0, 1]');
-    }
-    Sentry.init({
-      dsn: apiKey,
-      integrations: [
-        new BrowserTracing(),
-        new CaptureConsole({
-          levels: ['warn', 'error'],
-        }),
-      ],
-      environment,
-      tracesSampleRate,
-      initialScope: {
-        tags: {
-          environment,
-        },
-      },
-    });
+  if (!isProduction(environment)) {
+    return;
   }
+
+  if (tracesSampleRate < 0 || tracesSampleRate > 1) {
+    throw new Error('tracesSampleRate must be in the range [0, 1]');
+  }
+
+  Sentry.init({
+    dsn: apiKey,
+    integrations: [
+      new BrowserTracing(),
+      new CaptureConsole({
+        levels: ['warn', 'error'],
+      }),
+    ],
+    environment,
+    tracesSampleRate,
+    initialScope: {
+      tags: {
+        environment,
+      },
+    },
+  });
 };
 
 /**
  * Represents the current environment setting for providers.
- * @type {EnvironmentType | undefined}
+ * @type {EnvironmentType}
  * @description This variable stores the current environment setting
  *              used by providers. It is initially undefined and
  *              gets updated when the `initializeProviders` function is called.
  *              Make sure to call `initializeProviders` before accessing this value.
  */
-let currentProvidersEnvironment: EnvironmentType | undefined;
+let userSelectedEnvironment: EnvironmentType;
 
 /**
  * Initializes error tracking providers based on the given parameters.
  * @param {IInitializeParams | IInitializeParams[]} paramsArray - Parameters for initialization.
+ * @options {EnvironmentType} environment - The environment (e.g., 'production', 'development').
  * @returns {void}
  */
 export const initializeProviders = (
   paramsArray: IInitializeParams | IInitializeParams[],
-  environment: EnvironmentType = 'production',
+  options: { environment: EnvironmentType } = { environment: 'production' },
 ): void => {
+  const { environment } = options;
   const initializedProviders: string[] = [];
   const initialize = (params: IInitializeParams): void => {
     const {
@@ -143,16 +148,17 @@ export const initializeProviders = (
     initializedProviders.push(providerName);
   };
 
+  userSelectedEnvironment = environment;
+
   if (Array.isArray(paramsArray)) {
     paramsArray.forEach(initialize);
   } else {
     initialize(paramsArray);
   }
-  currentProvidersEnvironment = environment;
 
   if (initializedProviders.length > 0) {
     console.log('[Bluefin] Initialized providers:', initializedProviders);
   }
 };
 
-export { currentProvidersEnvironment };
+export { userSelectedEnvironment };

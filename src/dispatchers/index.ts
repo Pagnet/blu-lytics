@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { currentProvidersEnvironment } from '../initializers';
+import { userSelectedEnvironment } from '../initializers';
 import { providersList } from '../providers';
 import { isValidProvidersList } from '../utils';
 import { EventData, PropertiesType, UserPropertiesType } from './dispatchers.types';
@@ -35,10 +35,8 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
   });
 };
 
-const isDevelopment: boolean = currentProvidersEnvironment === 'development';
-
 const sendScreenEvent = (screen: string): void => {
-  if (isDevelopment) {
+  if (userSelectedEnvironment === 'development') {
     console.log(`[BLUEFIN]: Screen event: ${screen}`);
   } else {
     dispatchEventToAllProviders({ screen });
@@ -46,7 +44,7 @@ const sendScreenEvent = (screen: string): void => {
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  if (isDevelopment) {
+  if (userSelectedEnvironment === 'development') {
     console.log(
       `[BLUEFIN]: Custom event: ${event} - ${JSON.stringify(properties)}`,
     );
@@ -59,7 +57,7 @@ const sendUserIdentification = (
   id: string,
   userProperties: UserPropertiesType,
 ): void => {
-  if (isDevelopment) {
+  if (userSelectedEnvironment === 'development') {
     console.log(
       `[BLUEFIN]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
     );

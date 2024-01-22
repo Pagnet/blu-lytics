@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
-import { PropertiesType } from '../../dispatchers/dispatchers.types';
-import { ProviderType } from '../provider.types';
+import { PropertiesType } from '../../../dispatchers/dispatchers.types';
+import { ProviderType } from '../../provider.types';
 
 interface IUserProperties {
   email?: string;

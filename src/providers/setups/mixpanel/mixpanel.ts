@@ -1,6 +1,6 @@
 import mixpanel from 'mixpanel-browser';
-import { PropertiesType } from '../../dispatchers/dispatchers.types';
-import { ProviderType } from '../provider.types';
+import { PropertiesType } from '../../../dispatchers/dispatchers.types';
+import { ProviderType } from '../../provider.types';
 
 interface IUserProperties {
   email?: string;

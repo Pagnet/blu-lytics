@@ -1,6 +1,6 @@
-import * as FullStory from '@fullstory/browser';
-import { PropertiesType } from '../../dispatchers/dispatchers.types';
-import { ProviderType } from '../provider.types';
+import { clarity } from 'react-microsoft-clarity';
+import { PropertiesType } from '../../../dispatchers/dispatchers.types';
+import { ProviderType } from '../../provider.types';
 
 interface IUserProperties {
   email?: string;
@@ -12,26 +12,25 @@ const dispatchUserIdentification = (
   id: string,
   userProperties: IUserProperties,
 ): void => {
-  FullStory.identify(id);
-  FullStory.setUserVars(userProperties);
+  clarity.identify(id, { userProperties });
 };
 
 const dispatchCustomEvent = (
   event: string,
   properties: PropertiesType,
 ): void => {
-  FullStory.event(event, { properties });
+  console.log('custom event');
 };
 
 const dispatchScreenEvent = (screen: string): void => {
-  FullStory.event(screen, {});
+  console.log('screen event');
 };
 
-const FullStoryProvider: ProviderType = {
-  name: 'FullStory',
+const ClarityProvider: ProviderType = {
+  name: 'Clarity',
   userIdentification: dispatchUserIdentification,
   customEvent: dispatchCustomEvent,
   screenEvent: dispatchScreenEvent,
 };
 
-export default FullStoryProvider;
+export default ClarityProvider;
