@@ -8,6 +8,7 @@ import ClarityProvider from './setups/clarity/clarity';
  * An array containing the default provider(s).
  */
 const providersDefault: ProviderType[] = [
+  ClarityProvider,
   SentryProvider,
   MixPanelProvider,
   FullStoryProvider,
