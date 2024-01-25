@@ -1,8 +1,9 @@
 <h1 align="center">
   <img alt="Bluefin" src="https://github.com/Pagnet/bluefin/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6">
-  [![GitHub latest commit](https://badgen.net/github/last-commit/Naereen/Strapdown.js)](https://GitHub.com/Naereen/StrapDown.js/commit/)
-</h1>
+  
 
+</h1>
+  [![GitHub latest commit](https://badgen.net/github/last-commit/Naereen/Strapdown.js)](https://GitHub.com/Naereen/StrapDown.js/commit/)
 ## How it works
 Main goals include: being the sole entry point, simplifying integration between monitoring tools, and enabling centralized sending of messages and events.
 These goals offer developers the following benefits:
