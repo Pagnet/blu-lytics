@@ -43,7 +43,6 @@ import * as bluefin from ‘bluefin’;
 #### initializeProviders
 This method simplifies the connection to one or more monitoring tools, eliminating the need for pre-configurations. Simply provide the name of the tool to be used and its API key 'apiKey'.
 
-##### Usage
 To establish a connection with a single tool, it is necessary to pass an object as a parameter, containing the fields providerName, apiKey, and another object with the environment (the latter is optional, with the default value being 'production').
 ```js
 initializeProviders({providerName: 'MixPanel', apiKey: 'suaApiKey'}, {environment: ‘development’});
