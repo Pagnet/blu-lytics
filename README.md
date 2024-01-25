@@ -56,6 +56,37 @@ initializeProviders([
 ], {environment: ‘development’});
 ```
 
+### Method: `sendScreenEvent`
+This method sends a message that will be propagated and recorded in all tools that have been previously initialized through the initializeProviders method. To use it, only a string needs to be provided as a parameter.
+```js
+sendScreenEvent(‘page_view’);
+```
+
+### Method: `sendCustomEvent`
+This method sends an event with a message and additional optional parameters, which will be propagated and recorded in all tools that have been previously initialized through the initializeProviders method.
+
+To use it, two parameters need to be provided: a string to describe the event and an object containing the additional optional fields.
+```js
+sendCustomEvent('your_custom_page', {
+    props1: 'any-information',
+    props2: true,
+  });
+```
+
+### Method: `sendUserIdentification`
+This method sends relevant information related to user identification, such as their name, email, and ID, for example.
+
+To use, it is possible to provide two parameters: a string representing a unique identifier and an object containing additional and optional fields.
+```js
+sendUserIdentification('user-id', {
+    name: 'user name',
+    email: 'user@email.com',
+  });
+```
+
+## Incoming Updates
+### Suport for Microsoft Clarity
+
 ## Contributing
 Whether you're helping us fix bugs, improve the docs, or spread the word, we'd love to have you as part of this project! Read below to learn how you can take part of it.
 ### Code of Conduct
