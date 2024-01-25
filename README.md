@@ -84,8 +84,13 @@ sendUserIdentification('user-id', {
   });
 ```
 
+## Supported tracking tools
+- Sentry
+- Fullstory
+- Mixpanel
+
 ## Incoming Updates
-### Suport for Microsoft Clarity
+### - Suport for Microsoft Clarity
 
 ## Contributing
 Whether you're helping us fix bugs, improve the docs, or spread the word, we'd love to have you as part of this project! Read below to learn how you can take part of it.
