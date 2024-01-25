@@ -1,5 +1,5 @@
 <h1 align="center">
-    https://github.com/Pagnet/bluefin/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6
+  <img alt="Bluefin" src="https://github.com/Pagnet/bluefin/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6">
 </h1>
 
 ## How it works
