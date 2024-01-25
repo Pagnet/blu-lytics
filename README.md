@@ -4,17 +4,16 @@
 
 ## How it works
 Main goals include: being the sole entry point, simplifying integration between monitoring tools, and enabling centralized sending of messages and events.
-
 These goals offer developers the following benefits:
 
-- Unified messages and events
-    - Allows messages and events to be propagated across all monitoring tools through a single entry point.
+- **Unified messages and events**
+  Allows messages and events to be propagated across all monitoring tools through a single entry point.
 
-- Centralized and simplified configuration (Zero config)
-    - Enables initializing tools by providing only their key or token, without the need for prior configuration, saving time and reducing code.
+- **Centralized and simplified configuration (Zero config)**
+  Enables initializing tools by providing only their key or token, without the need for prior configuration, saving time and reducing code.
 
-- Scalability
-    - Facilitates the removal or addition of a tool, as the library contains all necessary configuration for operation. Flexibility that enhances the efficiency of monitoring tool management.
+- **Scalability**
+  Facilitates the removal or addition of a tool, as the library contains all necessary configuration for operation. Flexibility that enhances the efficiency of monitoring tool management.
 
 
 ## Installation
@@ -42,6 +41,21 @@ import * as bluefin from ‘bluefin’;
 ```
 
 #### initializeProviders
+This method simplifies the connection to one or more monitoring tools, eliminating the need for pre-configurations. Simply provide the name of the tool to be used and its API key 'apiKey'.
+
+##### Usage
+To establish a connection with a single tool, it is necessary to pass an object as a parameter, containing the fields providerName, apiKey, and another object with the environment (the latter is optional, with the default value being 'production').
+```js
+initializeProviders({providerName: 'MixPanel', apiKey: 'suaApiKey'}, {environment: ‘development’});
+```
+
+To connect to more than one tool, it is necessary to pass an array (list) of objects as a parameter, maintaining the fields providerName, apiKey, and another object containing environment (optional).
+```js
+initializeProviders([
+    { providerName: 'MixPanel', apiKey: 'suaApiKey'},
+    { providerName: 'FullStory', apiKey: 'suaApiKey'}
+], {environment: ‘development’});
+```
 
 ## Contributing
 Whether you're helping us fix bugs, improve the docs, or spread the word, we'd love to have you as part of this project! Read below to learn how you can take part of it.
