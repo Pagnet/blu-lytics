@@ -45,14 +45,14 @@ This method simplifies the connection to one or more monitoring tools, eliminati
 
 To establish a connection with a single tool, it is necessary to pass an object as a parameter, containing the fields providerName, apiKey, and another object with the environment (the latter is optional, with the default value being 'production').
 ```js
-initializeProviders({providerName: 'MixPanel', apiKey: 'suaApiKey'}, {environment: ‘development’});
+initializeProviders({providerName: 'track-tool-name', apiKey: 'your-api-key'}, {environment: ‘development’});
 ```
 
 To connect to more than one tool, it is necessary to pass an array (list) of objects as a parameter, maintaining the fields providerName, apiKey, and another object containing environment (optional).
 ```js
 initializeProviders([
-    { providerName: 'MixPanel', apiKey: 'suaApiKey'},
-    { providerName: 'FullStory', apiKey: 'suaApiKey'}
+    { providerName: 'track-tool-name', apiKey: 'your-api-key'},
+    { providerName: 'another-track-tool-name', apiKey: 'your-api-key'}
 ], {environment: ‘development’});
 ```
 
