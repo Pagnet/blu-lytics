@@ -6,13 +6,13 @@
 Main goals include: being the sole entry point, simplifying integration between monitoring tools, and enabling centralized sending of messages and events.
 These goals offer developers the following benefits:
 
-- **Unified messages and events**
+- **Unified messages and events** <br>
   Allows messages and events to be propagated across all monitoring tools through a single entry point.
 
-- **Centralized and simplified configuration (Zero config)**
+- **Centralized and simplified configuration (Zero config)** <br>
   Enables initializing tools by providing only their key or token, without the need for prior configuration, saving time and reducing code.
 
-- **Scalability**
+- **Scalability** <br>
   Facilitates the removal or addition of a tool, as the library contains all necessary configuration for operation. Flexibility that enhances the efficiency of monitoring tool management.
 
 
