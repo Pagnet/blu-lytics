@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="blu-lytics" src="https://github.com/Pagnet/blu-lytics/assets/102989712/33ad27f1-724e-4c8c-b2ec-f08d8a6f5539">
+  <img alt="blu-lytics" src="https://github.com/Pagnet/blu-lytics/assets/102989712/7d06f590-85c6-4373-bec5-c672aa46a68b">
 </h1>
 
 
