@@ -5,6 +5,9 @@
   "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "engines": {
+    "node": "^14"
+  },
   "scripts": {
     "build": "tsc --declaration",
     "dev": "ts-node src/index.ts",
