@@ -1,6 +1,7 @@
 <h1 align="center">
-  <img alt="blu-lytics" src="https://github.com/Pagnet/blu-lytics/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6">
+  <img alt="blu-lytics" src="https://github.com/Pagnet/blu-lytics/assets/102989712/33ad27f1-724e-4c8c-b2ec-f08d8a6f5539">
 </h1>
+
 
 ## How it works
 Main goals include: being the sole entry point, simplifying integration between monitoring tools, and enabling centralized sending of messages and events.
