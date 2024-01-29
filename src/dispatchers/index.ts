@@ -37,7 +37,7 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 
 const sendScreenEvent = (screen: string): void => {
   if (userSelectedEnvironment === 'development') {
-    console.log(`[BLUEFIN]: Screen event: ${screen}`);
+    console.log(`[blu-lytics]: Screen event: ${screen}`);
   } else {
     dispatchEventToAllProviders({ screen });
   }
@@ -46,7 +46,7 @@ const sendScreenEvent = (screen: string): void => {
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
   if (userSelectedEnvironment === 'development') {
     console.log(
-      `[BLUEFIN]: Custom event: ${event} - ${JSON.stringify(properties)}`,
+      `[blu-lytics]: Custom event: ${event} - ${JSON.stringify(properties)}`,
     );
   } else {
     dispatchEventToAllProviders({ event, properties });
@@ -59,7 +59,7 @@ const sendUserIdentification = (
 ): void => {
   if (userSelectedEnvironment === 'development') {
     console.log(
-      `[BLUEFIN]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
+      `[blu-lytics]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
     );
   } else {
     dispatchEventToAllProviders({ id, userProperties });

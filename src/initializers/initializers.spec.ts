@@ -25,7 +25,7 @@ describe('Initializers', () => {
 
       expect(userSelectedEnvironment).toBe('production');
       expect(logSpy).toHaveBeenCalledWith(
-        '[Bluefin] Initialized providers:',
+        '[blu-lytics] Initialized providers:',
         expect.arrayContaining(['Mixpanel', 'Sentry']),
       );
       logSpy.mockRestore();

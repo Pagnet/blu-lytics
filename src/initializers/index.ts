@@ -157,7 +157,7 @@ export const initializeProviders = (
   }
 
   if (initializedProviders.length > 0) {
-    console.log('[Bluefin] Initialized providers:', initializedProviders);
+    console.log('[blu-lytics] Initialized providers:', initializedProviders);
   }
 };
 

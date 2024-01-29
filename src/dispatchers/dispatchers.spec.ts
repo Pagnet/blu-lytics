@@ -32,7 +32,7 @@ describe('Event dispatching functions', () => {
 
     sendScreenEvent('TestScreen');
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('[BLUEFIN]: Screen event: TestScreen');
+    expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Screen event: TestScreen');
   });
 
   it('should be dispatch sendCustomEvent', () => {
@@ -40,7 +40,7 @@ describe('Event dispatching functions', () => {
 
     sendCustomEvent('TestEvent', { prop1: 'value1' });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('[BLUEFIN]: Custom event: TestEvent - {"prop1":"value1"}');
+    expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Custom event: TestEvent - {"prop1":"value1"}');
   });
 
   it('should be dispatch sendUserIdentification', () => {
@@ -48,6 +48,6 @@ describe('Event dispatching functions', () => {
 
     sendUserIdentification('123', { name: 'Name' });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('[BLUEFIN]: User identification: 123 - {"name":"Name"}');
+    expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: User identification: 123 - {"name":"Name"}');
   });
 });

@@ -1,5 +1,5 @@
 {
-  "name": "bluefin",
+  "name": "@useblu/blu-lytics",
   "version": "1.0.0",
   "private": false,
   "license": "MIT",
@@ -44,9 +44,9 @@
     "tsup": "^6.4.0",
     "typescript": "^4.8.4"
   },
-  "description": "bluefin",
+  "description": "blu-lytics",
   "keywords": [
-    "bluefin"
+    "blu-lytics"
   ],
   "author": "Blu",
   "homepage": "",

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img alt="Bluefin" src="https://github.com/Pagnet/bluefin/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6">
+  <img alt="blu-lytics" src="https://github.com/Pagnet/blu-lytics/assets/102989712/30df8c4f-fa3d-40d4-9205-44b14bb163f6">
 </h1>
 
 ## How it works
@@ -18,11 +18,11 @@ These goals offer developers the following benefits:
 
 ## Installation
 ```sh
-yarn add @useblu/bluefin
+yarn add @useblu/blu-lytics
 ```
 or
 ```sh
-npm i @useblu/bluefin
+npm i @useblu/blu-lytics
 ```
 ## Usage
 ### Importing Library
@@ -30,13 +30,13 @@ npm i @useblu/bluefin
 #### Destructuring the import
 ```js
 
-import { initializeProviders } from ‘bluefin’;
+import { initializeProviders } from ‘blu-lytics’;
 
 ```
 #### Importing all functionalities
 ```js
 
-import * as bluefin from ‘bluefin’;
+import * as blu-lytics from ‘blu-lytics’;
 
 ```
 

@@ -2,7 +2,7 @@
 
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
-The following is a set of guidelines for contributing to Bluefin. Please take a moment to review this document in order to make the contribution process straightforward and effective for everyone involved.
+The following is a set of guidelines for contributing to blu-lytics. Please take a moment to review this document in order to make the contribution process straightforward and effective for everyone involved.
 
 ### Table Of Contents
 
@@ -82,9 +82,9 @@ It’s important that every piece of code is reviewed by at least one core contr
 </details>
 
 ```bash
-git clone https://github.com/Pagnet/bluefin/
+git clone https://github.com/Pagnet/blu-lytics/
  # bonus: use your own fork for this step
-cd bluefin
+cd blu-lytics
 yarn # install dependencies
 ```
 
