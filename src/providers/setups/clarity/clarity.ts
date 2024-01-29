@@ -12,18 +12,18 @@ const dispatchUserIdentification = (
   id: string,
   userProperties: IUserProperties,
 ): void => {
-  clarity.identify(id, { userProperties });
+  clarity.identify(id, { userProperties: 'id' });
 };
 
 const dispatchCustomEvent = (
   event: string,
   properties: PropertiesType,
 ): void => {
-  console.log('custom event');
+  clarity.setTag(event, 'customEvent');
 };
 
 const dispatchScreenEvent = (screen: string): void => {
-  console.log('screen event');
+  clarity.setTag(screen, 'screen');
 };
 
 const ClarityProvider: ProviderType = {
