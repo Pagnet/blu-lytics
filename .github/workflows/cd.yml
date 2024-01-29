@@ -41,7 +41,7 @@ jobs:
         run: yarn build
 
       - name: Creates release if necessary
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
