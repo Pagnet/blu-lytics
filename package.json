@@ -45,11 +45,18 @@
     "typescript": "^4.8.4"
   },
   "description": "blu-lytics",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pagnet/blu-lytics.git"
+  },
   "keywords": [
     "blu-lytics"
   ],
   "author": "Blu",
-  "homepage": "",
+  "bugs": {
+    "url": "https://github.com/Pagnet/blu-lytics/issues"
+  },
+  "homepage": "https://github.com/Pagnet/blu-lytics#readme",
   "files": [
     "lib/**/*"
   ],
