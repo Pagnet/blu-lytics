@@ -27,6 +27,13 @@ describe('Event dispatching functions', () => {
     jest.clearAllMocks();
   });
 
+  const localStorageKey = '_bl_providers';
+  const providers = ['Sentry', 'MixPanel'];
+
+  beforeEach(() => {
+    localStorage.setItem(localStorageKey, JSON.stringify([providers]));
+  });
+
   it('should be dispatch sendScreenEvent', () => {
     const consoleLogSpy = jest.spyOn(console, 'log');
 
