@@ -54,10 +54,11 @@ const mixPanelInitializer = (
   apiKey: string,
 ): void => {
   if (isProduction(environment)) {
+    localStorage.setItem('_bl_mp', apiKey);
     mixpanel.init(apiKey, {
       track_pageview: true,
-      persistence: 'localStorage',
     });
+    localStorage.removeItem('_bl_init');
   }
 };
 
@@ -146,8 +147,10 @@ export const initializeProviders = (
         break;
     }
     initializedProviders.push(providerName);
+    localStorage.setItem('_bl_providers', JSON.stringify(initializedProviders));
   };
 
+  localStorage.setItem('_bl_env', environment);
   userSelectedEnvironment = environment;
 
   if (Array.isArray(paramsArray)) {
