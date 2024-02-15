@@ -55,9 +55,7 @@ const mixPanelInitializer = (
 ): void => {
   if (isProduction(environment)) {
     localStorage.setItem('_bl_mp', apiKey);
-    mixpanel.init(apiKey, {
-      track_pageview: true,
-    });
+    mixpanel.init(apiKey);
     localStorage.removeItem('_bl_init');
   }
 };

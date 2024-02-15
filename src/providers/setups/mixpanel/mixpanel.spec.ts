@@ -33,11 +33,13 @@ describe('MixPanelProvider', () => {
 
   test('dispatchCustomEvent should call mixpanel.track with event and properties', () => {
     const event = 'testEvent';
-    const properties = { key1: 'value1', key2: 'value2' };
+    const properties = {
+      key1: 'value1', key2: true, key3: 9.9, key4: ['value1', 'value2'],
+    };
 
     MixPanelProvider.customEvent(event, properties);
-
-    expect(mixpanel.track).toHaveBeenCalledWith(event, { properties });
+    const { ...rest } = properties;
+    expect(mixpanel.track).toHaveBeenCalledWith(event, rest);
   });
 
   test('dispatchScreenEvent should call mixpanel.track with screen', () => {
