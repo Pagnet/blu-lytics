@@ -1,9 +1,9 @@
 export type EventType = 'customEvent' | 'screenEvent' | 'userIdentification';
-export type PropertiesType = { [key: string]: string };
+export type PropertiesType = { [key: string]: string | boolean | number | string[] | undefined; };
 export type UserPropertiesType = {
   email?: string;
   name?: string;
-  [key: string]: string | undefined;
+  [key: string]: string | boolean | number | any[] | undefined;
 };
 export type EventData = {
   screen?: string;

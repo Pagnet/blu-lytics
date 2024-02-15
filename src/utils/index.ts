@@ -12,9 +12,7 @@ export const checkIfMixPanelIsInitialized = (provider: string): void => {
     const wasInitialized = localStorage.getItem('_bl_init');
 
     if (!wasInitialized) {
-      mixpanel.init(apiKey, {
-        track_pageview: true,
-      });
+      mixpanel.init(apiKey);
       localStorage.removeItem('_bl_mp');
       localStorage.setItem('_bl_init', 'init');
     }

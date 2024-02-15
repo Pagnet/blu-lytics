@@ -35,7 +35,8 @@ const dispatchCustomEvent = (
   event: string,
   properties: PropertiesType,
 ): void => {
-  mixpanel.track(event, { properties });
+  const { ...rest } = properties;
+  mixpanel.track(event, rest);
 };
 
 const dispatchScreenEvent = (screen: string): void => {
