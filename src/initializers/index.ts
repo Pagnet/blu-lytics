@@ -39,7 +39,11 @@ const fullStoryInitializer = (
   environment: EnvironmentType,
   apiKey: string,
 ): void => {
-  if (isProduction(environment)) init({ orgId: apiKey });
+  if (isProduction(environment)) {
+    init({ orgId: apiKey });
+  } else {
+    init({ orgId: apiKey, devMode: true });
+  }
 };
 
 /**
