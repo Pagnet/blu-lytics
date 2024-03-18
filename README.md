@@ -31,13 +31,13 @@ npm i @useblu/blu-lytics
 #### Destructuring the import
 ```js
 
-import { initializeProviders } from ‘blu-lytics’;
+import { initializeProviders } from 'blu-lytics';
 
 ```
 #### Importing all functionalities
 ```js
 
-import * as blu-lytics from ‘blu-lytics’;
+import * as blu-lytics from 'blu-lytics';
 
 ```
 
@@ -46,7 +46,7 @@ This method simplifies the connection to one or more monitoring tools, eliminati
 
 To establish a connection with a single tool, it is necessary to pass an object as a parameter, containing the fields providerName, apiKey, and another object with the environment (the latter is optional, with the default value being 'production').
 ```js
-initializeProviders({providerName: 'track-tool-name', apiKey: 'your-api-key'}, {environment: ‘development’});
+initializeProviders({providerName: 'track-tool-name', apiKey: 'your-api-key'}, {environment: 'development'});
 ```
 
 To connect to more than one tool, it is necessary to pass an array (list) of objects as a parameter, maintaining the fields providerName, apiKey, and another object containing environment (optional).
@@ -54,13 +54,13 @@ To connect to more than one tool, it is necessary to pass an array (list) of obj
 initializeProviders([
     { providerName: 'track-tool-name', apiKey: 'your-api-key'},
     { providerName: 'another-track-tool-name', apiKey: 'your-api-key'}
-], {environment: ‘development’});
+], {environment: 'development'});
 ```
 
 ### Method: `sendScreenEvent`
 This method sends a message that will be propagated and recorded in all tools that have been previously initialized through the initializeProviders method. To use it, only a string needs to be provided as a parameter.
 ```js
-sendScreenEvent(‘page_view’);
+sendScreenEvent('page_view');
 ```
 
 ### Method: `sendCustomEvent`
