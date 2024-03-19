@@ -29,6 +29,7 @@ const clarityInitializer = (
   if (isProduction(environment)) {
     clarity.start({
       projectId: apiKey,
+      upload: 'https://m.clarity.ms/collect',
       track: true,
       content: true,
     });
