@@ -1,4 +1,4 @@
-import { clarity } from 'react-microsoft-clarity';
+import { clarity } from 'clarity-js';
 import { PropertiesType } from '../../../dispatchers/dispatchers.types';
 import { ProviderType } from '../../provider.types';
 
@@ -12,18 +12,18 @@ const dispatchUserIdentification = (
   id: string,
   userProperties: IUserProperties,
 ): void => {
-  clarity.identify(id, { userProperties: 'id' });
+  clarity.identify(id);
 };
 
 const dispatchCustomEvent = (
   event: string,
   properties: PropertiesType,
 ): void => {
-  clarity.setTag(event, 'customEvent');
+  clarity.set(event, 'customEvent');
 };
 
 const dispatchScreenEvent = (screen: string): void => {
-  clarity.setTag(screen, 'screen');
+  clarity.set(screen, 'screen');
 };
 
 const ClarityProvider: ProviderType = {
