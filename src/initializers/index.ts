@@ -13,8 +13,7 @@ import { IInitializeParams, EnvironmentType } from './initializers.types';
  * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
  * @returns {boolean} - True if the environment is 'production', false otherwise.
  */
-const isProduction = (environment: EnvironmentType): boolean =>
-  environment === 'production';
+const isProduction = (environment: EnvironmentType): boolean => environment === 'production';
 
 /**
  * Initializes Microsoft Clarity for error tracking in a web environment.
@@ -172,4 +171,3 @@ export const initializeProviders = (
 };
 
 export { userSelectedEnvironment };
-
