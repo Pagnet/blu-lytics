@@ -20,10 +20,10 @@
     "@sentry/integrations": "^6.19.7",
     "@sentry/react": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
+    "clarity-js": "^0.7.24",
     "jest-environment-jsdom": "^29.7.0",
     "mixpanel-browser": "^2.48.1",
-    "react": "^18.2.0",
-    "react-microsoft-clarity": "^1.2.0"
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",

@@ -4,7 +4,8 @@ import { init } from '@fullstory/browser';
 import mixpanel from 'mixpanel-browser';
 import { BrowserTracing } from '@sentry/tracing';
 import { CaptureConsole } from '@sentry/integrations';
-import { clarity } from 'react-microsoft-clarity';
+import { clarity } from 'clarity-js';
+
 import { IInitializeParams, EnvironmentType } from './initializers.types';
 
 /**
@@ -25,7 +26,13 @@ const clarityInitializer = (
   environment: EnvironmentType,
   apiKey: string,
 ): void => {
-  if (isProduction(environment)) clarity.init(apiKey);
+  if (isProduction(environment)) {
+    clarity.start({
+      projectId: apiKey,
+      track: true,
+      content: true,
+    });
+  }
 };
 
 /**
@@ -126,11 +133,7 @@ export const initializeProviders = (
   const { environment } = options;
   const initializedProviders: string[] = [];
   const initialize = (params: IInitializeParams): void => {
-    const {
-      providerName,
-      tracesSampleRate = 0.1,
-      apiKey = '',
-    } = params;
+    const { providerName, tracesSampleRate = 0.1, apiKey = '' } = params;
 
     switch (providerName) {
       case 'Clarity':
