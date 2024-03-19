@@ -13,7 +13,8 @@ import { IInitializeParams, EnvironmentType } from './initializers.types';
  * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
  * @returns {boolean} - True if the environment is 'production', false otherwise.
  */
-const isProduction = (environment: EnvironmentType): boolean => environment === 'production';
+const isProduction = (environment: EnvironmentType): boolean =>
+  environment === 'production';
 
 /**
  * Initializes Microsoft Clarity for error tracking in a web environment.
@@ -29,6 +30,7 @@ const clarityInitializer = (
   if (isProduction(environment)) {
     clarity.start({
       projectId: apiKey,
+      upload: 'https://m.clarity.ms/collect',
       track: true,
       content: true,
     });
@@ -170,3 +172,4 @@ export const initializeProviders = (
 };
 
 export { userSelectedEnvironment };
+
