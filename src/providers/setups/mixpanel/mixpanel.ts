@@ -13,6 +13,8 @@ const dispatchUserIdentification = (
   userProperties: IUserProperties,
 ): void => {
   mixpanel.identify(id);
+  mixpanel.people.set({ USER_ID: id });
+
   const superProperties = ['name', 'email'];
   const peopleProperties: Record<string, any> = {};
 
@@ -51,3 +53,4 @@ const MixPanelProvider: ProviderType = {
 };
 
 export default MixPanelProvider;
+
