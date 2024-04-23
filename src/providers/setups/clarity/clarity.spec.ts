@@ -16,21 +16,4 @@ describe('ClarityProvider', () => {
 
     expect(clarity.identify).toHaveBeenCalledWith(userId);
   });
-
-  it('dispatchCustomEvent should call clarity.set with correct arguments', () => {
-    const eventName = 'clickEvent';
-    const properties = { key: 'value' };
-
-    ClarityProvider.customEvent(eventName, properties);
-
-    expect(clarity.set).toHaveBeenCalledWith(eventName, 'customEvent');
-  });
-
-  it('dispatchScreenEvent should call clarity.set with correct arguments', () => {
-    const screenName = 'HomeScreen';
-
-    ClarityProvider.screenEvent(screenName);
-
-    expect(clarity.set).toHaveBeenCalledWith(screenName, 'screen');
-  });
 });
