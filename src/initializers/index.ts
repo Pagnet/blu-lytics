@@ -33,6 +33,7 @@ const clarityInitializer = (
       track: true,
       content: true,
     });
+    clarity.consent();
   }
 };
 
