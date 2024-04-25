@@ -11,6 +11,7 @@ const providersDefault: ProviderType[] = [
   SentryProvider,
   MixPanelProvider,
   FullStoryProvider,
+  ClarityProvider,
 ];
 /**
  * An array containing the list of providers, initialized with the default provider(s).
