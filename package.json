@@ -1,6 +1,6 @@
 {
   "name": "@useblu/blu-lytics",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "private": false,
   "license": "MIT",
   "main": "lib/index.js",
