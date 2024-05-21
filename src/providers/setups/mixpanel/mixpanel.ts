@@ -38,11 +38,20 @@ const dispatchCustomEvent = (
   properties: PropertiesType,
 ): void => {
   const { ...rest } = properties;
-  mixpanel.track(event, rest);
+
+  try {
+    mixpanel.track(event, rest);
+  } catch (error) {
+    console.error('Error tracking screen event:', error);
+  }
 };
 
 const dispatchScreenEvent = (screen: string): void => {
-  mixpanel.track(screen);
+  try {
+    mixpanel.track(screen);
+  } catch (error) {
+    console.error('Error tracking screen event:', error);
+  }
 };
 
 const MixPanelProvider: ProviderType = {
