@@ -66,4 +66,3 @@ const MixPanelProvider: ProviderType = {
 };
 
 export default MixPanelProvider;
-

@@ -7,8 +7,10 @@ jest.mock('mixpanel-browser', () => ({
   people: {
     set: jest.fn(),
   },
-
 }));
+
+jest.useFakeTimers();
+jest.spyOn(global, 'setTimeout');
 
 describe('MixPanelProvider', () => {
   afterEach(() => {
@@ -34,11 +36,15 @@ describe('MixPanelProvider', () => {
   test('dispatchCustomEvent should call mixpanel.track with event and properties', () => {
     const event = 'testEvent';
     const properties = {
-      key1: 'value1', key2: true, key3: 9.9, key4: ['value1', 'value2'],
+      key1: 'value1',
+      key2: true,
+      key3: 9.9,
+      key4: ['value1', 'value2'],
     };
 
     MixPanelProvider.customEvent(event, properties);
     const { ...rest } = properties;
+    jest.runAllTimers();
     expect(mixpanel.track).toHaveBeenCalledWith(event, rest);
   });
 
@@ -47,6 +53,7 @@ describe('MixPanelProvider', () => {
 
     MixPanelProvider.screenEvent(screen);
 
+    jest.runAllTimers();
     expect(mixpanel.track).toHaveBeenCalledWith(screen);
   });
 });
