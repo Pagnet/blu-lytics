@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { providersList } from '../providers';
 import { EventData, PropertiesType, UserPropertiesType } from './dispatchers.types';
-import { checkIfMixPanelIsInitialized } from '../utils';
 
 /**
  * Dispatches the specified event data to all configured providers.
@@ -18,7 +17,6 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 
   if (providersFiltered.length > 0) {
     providersFiltered.forEach((provider) => {
-      checkIfMixPanelIsInitialized(provider.name);
       const actions = {
         screenEvent: () => provider.screenEvent
           && eventData.screen
