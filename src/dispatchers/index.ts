@@ -19,24 +19,29 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
   );
 
   const providersFiltered = localStorageProvidersList
-    ? providersList.filter((item) => localStorageProvidersList.includes(item.name))
+    ? providersList.filter((item) =>
+        localStorageProvidersList.includes(item.name),
+      )
     : providersList;
 
   if (providersFiltered.length > 0) {
     providersFiltered.forEach((provider) => {
       checkIfMixPanelIsInitialized(provider.name);
       const actions = {
-        screenEvent: () => provider.screenEvent
-          && eventData.screen
-          && provider.screenEvent(eventData.screen),
-        customEvent: () => provider.customEvent
-          && eventData.event
-          && eventData.properties
-          && provider.customEvent(eventData.event, eventData.properties),
-        userIdentification: () => provider.userIdentification
-          && eventData.id
-          && eventData.userProperties
-          && provider.userIdentification(eventData.id, eventData.userProperties),
+        screenEvent: () =>
+          provider.screenEvent &&
+          eventData.screen &&
+          provider.screenEvent(eventData.screen),
+        customEvent: () =>
+          provider.customEvent &&
+          eventData.event &&
+          eventData.properties &&
+          provider.customEvent(eventData.event, eventData.properties),
+        userIdentification: () =>
+          provider.userIdentification &&
+          eventData.id &&
+          eventData.userProperties &&
+          provider.userIdentification(eventData.id, eventData.userProperties),
       };
 
       Object.values(actions).forEach((action) => action());
@@ -56,28 +61,39 @@ const sendScreenEvent = (screen: string): void => {
 
 let defaultProperties: PropertiesType = {};
 
-const saveDefaultPropertiesToLocalStorage = (properties: PropertiesType): void => {
+const saveDefaultPropertiesToLocalStorage = (
+  properties: PropertiesType,
+): void => {
   localStorage.setItem('_bl_props', JSON.stringify(properties));
 };
 
 const loadDefaultPropertiesFromLocalStorage = (): PropertiesType => {
+  console.log('loadDefaultPropertiesFromLocalStorage disparou funcao');
   const storedProperties = localStorage.getItem('_bl_props');
+  console.log(
+    storedProperties,
+    'storedProperties dentro do loadDefaultPropertiesFromLocalStorage',
+  );
   return storedProperties ? JSON.parse(storedProperties) : {};
 };
 
 const setDefaultProperties = (properties: PropertiesType): void => {
+  console.log(properties, 'setDefaultProperties disparou funcao');
   defaultProperties = { ...properties };
   saveDefaultPropertiesToLocalStorage(defaultProperties);
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  if (Object.keys(defaultProperties).length === 0) {
-    defaultProperties = loadDefaultPropertiesFromLocalStorage();
-  }
+  const storedDefaultProperties = loadDefaultPropertiesFromLocalStorage();
+
+  console.log(storedDefaultProperties, 'storedDefaultProperties');
+
   const mergedProperties = {
-    ...defaultProperties,
+    ...storedDefaultProperties,
     ...properties,
   };
+
+  console.log(mergedProperties, 'mergedProperties');
 
   if (currentEnvironment === 'development') {
     console.log(
@@ -111,3 +127,4 @@ export {
   sendUserIdentification,
   setDefaultProperties,
 };
+
