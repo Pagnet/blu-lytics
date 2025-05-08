@@ -50,9 +50,9 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 };
 
 const currentEnvironment = localStorage.getItem('_bl_env') || 'development';
-
+const isDevelopment = currentEnvironment === 'development';
 const sendScreenEvent = (screen: string): void => {
-  if (currentEnvironment === 'development') {
+  if (isDevelopment) {
     console.log(`[blu-lytics]: Screen event: ${screen}`);
   } else {
     dispatchEventToAllProviders({ screen });
@@ -68,17 +68,11 @@ const saveDefaultPropertiesToLocalStorage = (
 };
 
 const loadDefaultPropertiesFromLocalStorage = (): PropertiesType => {
-  console.log('loadDefaultPropertiesFromLocalStorage disparou funcao');
   const storedProperties = localStorage.getItem('_bl_props');
-  console.log(
-    storedProperties,
-    'storedProperties dentro do loadDefaultPropertiesFromLocalStorage',
-  );
   return storedProperties ? JSON.parse(storedProperties) : {};
 };
 
 const setDefaultProperties = (properties: PropertiesType): void => {
-  console.log(properties, 'setDefaultProperties disparou funcao');
   defaultProperties = { ...properties };
   saveDefaultPropertiesToLocalStorage(defaultProperties);
 };
@@ -86,16 +80,12 @@ const setDefaultProperties = (properties: PropertiesType): void => {
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
   const storedDefaultProperties = loadDefaultPropertiesFromLocalStorage();
 
-  console.log(storedDefaultProperties, 'storedDefaultProperties');
-
   const mergedProperties = {
     ...storedDefaultProperties,
     ...properties,
   };
 
-  console.log(mergedProperties, 'mergedProperties');
-
-  if (currentEnvironment === 'development') {
+  if (isDevelopment) {
     console.log(
       `[blu-lytics]: Custom event: ${event} - ${JSON.stringify(
         mergedProperties,
@@ -110,7 +100,7 @@ const sendUserIdentification = (
   id: string,
   userProperties: UserPropertiesType,
 ): void => {
-  if (currentEnvironment === 'development') {
+  if (isDevelopment) {
     console.log(
       `[blu-lytics]: User identification: ${id} - ${JSON.stringify(
         userProperties,
