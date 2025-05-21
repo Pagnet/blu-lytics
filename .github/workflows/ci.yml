@@ -1,4 +1,5 @@
 name: CI
+run-name: CI triggered by @${{ github.actor }} pull request
 
 on: push
 
@@ -24,3 +25,7 @@ jobs:
 
       - name: Run tests
         run: yarn test --coverage
+  semgrep:
+    uses: Pagnet/github-actions/.github/workflows/semgrep-scan.yml@main
+    secrets: inherit
+
