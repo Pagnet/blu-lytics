@@ -1,9 +1,13 @@
 name: CI
 
-on: push
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   build:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,3 +28,7 @@ jobs:
 
       - name: Run tests
         run: yarn test --coverage
+  semgrep:
+    if: github.event_name == 'pull_request'
+    uses: Pagnet/github-actions/.github/workflows/semgrep-scan.yml@main
+    secrets: inherit
