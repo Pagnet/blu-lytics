@@ -20,8 +20,8 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 
   const providersFiltered = localStorageProvidersList
     ? providersList.filter((item) =>
-        localStorageProvidersList.includes(item.name),
-      )
+      localStorageProvidersList.includes(item.name),
+    )
     : providersList;
 
   if (providersFiltered.length > 0) {
@@ -59,8 +59,6 @@ const sendScreenEvent = (screen: string): void => {
   }
 };
 
-let defaultProperties: PropertiesType = {};
-
 const saveDefaultPropertiesToLocalStorage = (
   properties: PropertiesType,
 ): void => {
@@ -72,16 +70,26 @@ const loadDefaultPropertiesFromLocalStorage = (): PropertiesType => {
   return storedProperties ? JSON.parse(storedProperties) : {};
 };
 
+let defaultProperties: PropertiesType = loadDefaultPropertiesFromLocalStorage();
+
 const setDefaultProperties = (properties: PropertiesType): void => {
   defaultProperties = { ...properties };
   saveDefaultPropertiesToLocalStorage(defaultProperties);
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  const storedDefaultProperties = loadDefaultPropertiesFromLocalStorage();
+  const rawStoredProperties = localStorage.getItem('_bl_props');
+
+  if (rawStoredProperties) {
+    try {
+      defaultProperties = JSON.parse(rawStoredProperties);
+    } catch (error) {
+      console.error('[blu-lytics] Failed to parse stored properties', error);
+    }
+  }
 
   const mergedProperties = {
-    ...storedDefaultProperties,
+    ...defaultProperties,
     ...properties,
   };
 
