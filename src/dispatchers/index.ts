@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { providersList } from '../providers';
-import { EventData, PropertiesType, UserPropertiesType } from './dispatchers.types';
+import {
+  EventData,
+  PropertiesType,
+  UserPropertiesType,
+} from './dispatchers.types';
 import { checkIfMixPanelIsInitialized } from '../utils';
 
 /**
@@ -10,27 +14,34 @@ import { checkIfMixPanelIsInitialized } from '../utils';
  * @returns {void}
  */
 export const dispatchEventToAllProviders = (eventData: EventData): void => {
-  const localStorageProvidersList = JSON.parse(localStorage?.getItem('_bl_providers') as string);
+  const localStorageProvidersList = JSON.parse(
+    localStorage?.getItem('_bl_providers') as string,
+  );
 
   const providersFiltered = localStorageProvidersList
-    ? providersList.filter((item) => localStorageProvidersList.includes(item.name))
+    ? providersList.filter((item) =>
+      localStorageProvidersList.includes(item.name),
+    )
     : providersList;
 
   if (providersFiltered.length > 0) {
     providersFiltered.forEach((provider) => {
       checkIfMixPanelIsInitialized(provider.name);
       const actions = {
-        screenEvent: () => provider.screenEvent
-          && eventData.screen
-          && provider.screenEvent(eventData.screen),
-        customEvent: () => provider.customEvent
-          && eventData.event
-          && eventData.properties
-          && provider.customEvent(eventData.event, eventData.properties),
-        userIdentification: () => provider.userIdentification
-          && eventData.id
-          && eventData.userProperties
-          && provider.userIdentification(eventData.id, eventData.userProperties),
+        screenEvent: () =>
+          provider.screenEvent &&
+          eventData.screen &&
+          provider.screenEvent(eventData.screen),
+        customEvent: () =>
+          provider.customEvent &&
+          eventData.event &&
+          eventData.properties &&
+          provider.customEvent(eventData.event, eventData.properties),
+        userIdentification: () =>
+          provider.userIdentification &&
+          eventData.id &&
+          eventData.userProperties &&
+          provider.userIdentification(eventData.id, eventData.userProperties),
       };
 
       Object.values(actions).forEach((action) => action());
@@ -39,22 +50,57 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 };
 
 const currentEnvironment = localStorage.getItem('_bl_env') || 'development';
-
+const isDevelopment = currentEnvironment === 'development';
 const sendScreenEvent = (screen: string): void => {
-  if (currentEnvironment === 'development') {
+  if (isDevelopment) {
     console.log(`[blu-lytics]: Screen event: ${screen}`);
   } else {
     dispatchEventToAllProviders({ screen });
   }
 };
 
+const saveDefaultPropertiesToLocalStorage = (
+  properties: PropertiesType,
+): void => {
+  localStorage.setItem('_bl_props', JSON.stringify(properties));
+};
+
+const loadDefaultPropertiesFromLocalStorage = (): PropertiesType => {
+  const storedProperties = localStorage.getItem('_bl_props');
+  return storedProperties ? JSON.parse(storedProperties) : {};
+};
+
+let defaultProperties: PropertiesType = loadDefaultPropertiesFromLocalStorage();
+
+const setDefaultProperties = (properties: PropertiesType): void => {
+  defaultProperties = { ...properties };
+  saveDefaultPropertiesToLocalStorage(defaultProperties);
+};
+
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
-  if (currentEnvironment === 'development') {
+  const rawStoredProperties = localStorage.getItem('_bl_props');
+
+  if (rawStoredProperties) {
+    try {
+      defaultProperties = JSON.parse(rawStoredProperties);
+    } catch (error) {
+      console.error('[blu-lytics] Failed to parse stored properties', error);
+    }
+  }
+
+  const mergedProperties = {
+    ...defaultProperties,
+    ...properties,
+  };
+
+  if (isDevelopment) {
     console.log(
-      `[blu-lytics]: Custom event: ${event} - ${JSON.stringify(properties)}`,
+      `[blu-lytics]: Custom event: ${event} - ${JSON.stringify(
+        mergedProperties,
+      )}`,
     );
   } else {
-    dispatchEventToAllProviders({ event, properties });
+    dispatchEventToAllProviders({ event, properties: mergedProperties });
   }
 };
 
@@ -62,13 +108,21 @@ const sendUserIdentification = (
   id: string,
   userProperties: UserPropertiesType,
 ): void => {
-  if (currentEnvironment === 'development') {
+  if (isDevelopment) {
     console.log(
-      `[blu-lytics]: User identification: ${id} - ${JSON.stringify(userProperties)}`,
+      `[blu-lytics]: User identification: ${id} - ${JSON.stringify(
+        userProperties,
+      )}`,
     );
   } else {
     dispatchEventToAllProviders({ id, userProperties });
   }
 };
 
-export { sendCustomEvent, sendScreenEvent, sendUserIdentification };
+export {
+  sendCustomEvent,
+  sendScreenEvent,
+  sendUserIdentification,
+  setDefaultProperties,
+};
+
