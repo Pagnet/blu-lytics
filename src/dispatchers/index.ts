@@ -20,8 +20,8 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 
   const providersFiltered = localStorageProvidersList
     ? providersList.filter((item) =>
-      localStorageProvidersList.includes(item.name),
-    )
+        localStorageProvidersList.includes(item.name),
+      )
     : providersList;
 
   if (providersFiltered.length > 0) {
@@ -49,10 +49,13 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
   }
 };
 
-const currentEnvironment = localStorage.getItem('_bl_env') || 'development';
-const isDevelopment = currentEnvironment === 'development';
+const getIsDevelopment = (): boolean => {
+  const currentEnvironment = localStorage.getItem('_bl_env') || 'development';
+  return currentEnvironment === 'development';
+};
+
 const sendScreenEvent = (screen: string): void => {
-  if (isDevelopment) {
+  if (getIsDevelopment()) {
     console.log(`[blu-lytics]: Screen event: ${screen}`);
   } else {
     dispatchEventToAllProviders({ screen });
@@ -93,7 +96,7 @@ const sendCustomEvent = (event: string, properties: PropertiesType): void => {
     ...properties,
   };
 
-  if (isDevelopment) {
+  if (getIsDevelopment()) {
     console.log(
       `[blu-lytics]: Custom event: ${event} - ${JSON.stringify(
         mergedProperties,
@@ -108,7 +111,7 @@ const sendUserIdentification = (
   id: string,
   userProperties: UserPropertiesType,
 ): void => {
-  if (isDevelopment) {
+  if (getIsDevelopment()) {
     console.log(
       `[blu-lytics]: User identification: ${id} - ${JSON.stringify(
         userProperties,
