@@ -23,6 +23,9 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^24.0.0",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.2.3",
     "@types/mixpanel-browser": "^2.47.5",
