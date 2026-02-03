@@ -8,16 +8,21 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_OAUTH_TOKEN }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Use Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
           registry-url: https://registry.npmjs.org/
           cache: 'yarn'
 
@@ -27,17 +32,8 @@ jobs:
       - name: Build all
         run: yarn build
 
-      - name: Creates release if necessary
-        if: github.ref == 'refs/heads/main'
+      - name: Semantic Release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm whoami
-
-          OLD_PACKAGE_VERSION=$(git show HEAD~1:package.json | jq -r '.version')
-          NEW_PACKAGE_VERSION=$(git show HEAD:package.json | jq -r '.version')
-
-          if [ "$NEW_PACKAGE_VERSION" != "$OLD_PACKAGE_VERSION" ]; then
-            echo "Version changed to $NEW_PACKAGE_VERSION. Publishing..."
-            npm publish --access public
-          fi
+          GITHUB_TOKEN: ${{ secrets.GH_OAUTH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
