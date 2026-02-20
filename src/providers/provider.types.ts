@@ -5,4 +5,5 @@ export type ProviderType = {
   userIdentification: (id: string, userProperties: any) => void;
   customEvent: (event: string, properties: PropertiesType) => void;
   screenEvent: (screen: string) => void;
+  reset?: () => void;
 };
