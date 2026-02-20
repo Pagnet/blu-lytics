@@ -58,11 +58,20 @@ const dispatchScreenEvent = (screen: string): void => {
   }
 };
 
+const dispatchReset = (): void => {
+  try {
+    mixpanel.reset();
+  } catch (error) {
+    console.error('Error resetting Mixpanel:', error);
+  }
+};
+
 const MixPanelProvider: ProviderType = {
   name: 'MixPanel',
   userIdentification: dispatchUserIdentification,
   customEvent: dispatchCustomEvent,
   screenEvent: dispatchScreenEvent,
+  reset: dispatchReset,
 };
 
 export default MixPanelProvider;

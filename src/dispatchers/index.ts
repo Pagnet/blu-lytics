@@ -122,10 +122,19 @@ const sendUserIdentification = (
   }
 };
 
+const resetMixpanel = (): void => {
+  const provider = providersList.find((item) => item.name === 'MixPanel');
+  if (provider?.reset) {
+    checkIfMixPanelIsInitialized(provider.name);
+    provider.reset();
+  }
+};
+
 export {
   sendCustomEvent,
   sendScreenEvent,
   sendUserIdentification,
   setDefaultProperties,
+  resetMixpanel,
 };
 
