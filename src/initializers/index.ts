@@ -13,7 +13,8 @@ import { IInitializeParams, EnvironmentType } from './initializers.types';
  * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
  * @returns {boolean} - True if the environment is 'production', false otherwise.
  */
-const isProduction = (environment: EnvironmentType): boolean => environment === 'production';
+const isProduction = (environment: EnvironmentType): boolean =>
+  environment === 'production';
 
 /**
  * Initializes Microsoft Clarity for error tracking in a web environment.
@@ -65,10 +66,18 @@ const fullStoryInitializer = (
 const mixPanelInitializer = (
   environment: EnvironmentType,
   apiKey: string,
+  options?: {
+    recordSessionPercent: number;
+    recordIdleTimeoutMs: number;
+  },
 ): void => {
   if (isProduction(environment)) {
     localStorage.setItem('_bl_mp', apiKey);
-    mixpanel.init(apiKey);
+    localStorage.setItem('_bl_mp_options', JSON.stringify(options));
+    mixpanel.init(apiKey, {
+      record_sessions_percent: options?.recordSessionPercent,
+      record_idle_timeout_ms: options?.recordIdleTimeoutMs,
+    });
     localStorage.removeItem('_bl_init');
   }
 };
@@ -130,7 +139,13 @@ let userSelectedEnvironment: EnvironmentType;
  */
 export const initializeProviders = (
   paramsArray: IInitializeParams | IInitializeParams[],
-  options: { environment: EnvironmentType } = { environment: 'production' },
+  options: {
+    environment: EnvironmentType;
+    mixPanelOptions?: {
+      recordSessionPercent: number;
+      recordIdleTimeoutMs: number;
+    };
+  } = { environment: 'production' },
 ): void => {
   const { environment } = options;
   const initializedProviders: string[] = [];
@@ -148,7 +163,7 @@ export const initializeProviders = (
         sentryInitializer(environment, apiKey, tracesSampleRate);
         break;
       case 'MixPanel':
-        mixPanelInitializer(environment, apiKey);
+        mixPanelInitializer(environment, apiKey, options.mixPanelOptions);
         break;
       default:
         break;
@@ -172,3 +187,4 @@ export const initializeProviders = (
 };
 
 export { userSelectedEnvironment };
+
