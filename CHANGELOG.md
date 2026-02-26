@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Pagnet/blu-lytics/compare/v1.1.0...v1.2.0) (2026-02-26)
+
+
+### Features
+
+* reset dev mode ([#36](https://github.com/Pagnet/blu-lytics/issues/36)) ([ff2e261](https://github.com/Pagnet/blu-lytics/commit/ff2e2618ae0a808340bf9e15efdc1cb265ebac87))
+
 # [1.1.0](https://github.com/Pagnet/blu-lytics/compare/v1.0.2...v1.1.0) (2026-02-25)
 
 
