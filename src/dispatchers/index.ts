@@ -123,10 +123,14 @@ const sendUserIdentification = (
 };
 
 const resetMixpanel = (): void => {
+  if (getIsDevelopment()) {
+    console.log('[blu-lytics]: Resetting Mixpanel');
+  } else {
   const provider = providersList.find((item) => item.name === 'MixPanel');
-  if (provider?.reset) {
-    checkIfMixPanelIsInitialized(provider.name);
-    provider.reset();
+    if (provider?.reset) {
+      checkIfMixPanelIsInitialized(provider.name);
+      provider.reset();
+    }
   }
 };
 
