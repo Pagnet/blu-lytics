@@ -69,6 +69,7 @@ const mixPanelInitializer = (
   options?: {
     recordSessionPercent: number;
     recordIdleTimeoutMs: number;
+    recordMaskAllText: boolean;
   },
 ): void => {
   if (isProduction(environment)) {
@@ -77,6 +78,7 @@ const mixPanelInitializer = (
     mixpanel.init(apiKey, {
       record_sessions_percent: options?.recordSessionPercent,
       record_idle_timeout_ms: options?.recordIdleTimeoutMs,
+      record_mask_all_text: options?.recordMaskAllText,
     });
     localStorage.removeItem('_bl_init');
   }
@@ -144,6 +146,7 @@ export const initializeProviders = (
     mixPanelOptions?: {
       recordSessionPercent: number;
       recordIdleTimeoutMs: number;
+      recordMaskAllText: boolean;
     };
   } = { environment: 'production' },
 ): void => {
