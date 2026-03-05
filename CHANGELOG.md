@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Pagnet/blu-lytics/compare/v1.2.0...v1.3.0) (2026-03-05)
+
+
+### Features
+
+* new mixpanel option ([#37](https://github.com/Pagnet/blu-lytics/issues/37)) ([9e21dd2](https://github.com/Pagnet/blu-lytics/commit/9e21dd2857775983890a7cc41b1b00f337873b3b))
+
 # [1.2.0](https://github.com/Pagnet/blu-lytics/compare/v1.1.0...v1.2.0) (2026-02-26)
 
 
