@@ -31,7 +31,7 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
         screenEvent: () =>
           provider.screenEvent &&
           eventData.screen &&
-          provider.screenEvent(eventData.screen),
+          provider.screenEvent(eventData.screen, eventData.properties),
         customEvent: () =>
           provider.customEvent &&
           eventData.event &&
@@ -54,14 +54,6 @@ const getIsDevelopment = (): boolean => {
   return currentEnvironment === 'development';
 };
 
-const sendScreenEvent = (screen: string): void => {
-  if (getIsDevelopment()) {
-    console.log(`[blu-lytics]: Screen event: ${screen}`);
-  } else {
-    dispatchEventToAllProviders({ screen });
-  }
-};
-
 const saveDefaultPropertiesToLocalStorage = (
   properties: PropertiesType,
 ): void => {
@@ -78,6 +70,45 @@ let defaultProperties: PropertiesType = loadDefaultPropertiesFromLocalStorage();
 const setDefaultProperties = (properties: PropertiesType): void => {
   defaultProperties = { ...properties };
   saveDefaultPropertiesToLocalStorage(defaultProperties);
+};
+
+const sendScreenEvent = (
+  screen: string,
+  properties?: PropertiesType,
+): void => {
+  if (!properties) {
+    if (getIsDevelopment()) {
+      console.log(`[blu-lytics]: Screen event: ${screen}`);
+    } else {
+      dispatchEventToAllProviders({ screen });
+    }
+    return;
+  }
+
+  const rawStoredProperties = localStorage.getItem('_bl_props');
+
+  if (rawStoredProperties) {
+    try {
+      defaultProperties = JSON.parse(rawStoredProperties);
+    } catch (error) {
+      console.error('[blu-lytics] Failed to parse stored properties', error);
+    }
+  }
+
+  const mergedProperties = {
+    ...defaultProperties,
+    ...properties,
+  };
+
+  if (getIsDevelopment()) {
+    console.log(
+      `[blu-lytics]: Screen event: ${screen} - ${JSON.stringify(
+        mergedProperties,
+      )}`,
+    );
+  } else {
+    dispatchEventToAllProviders({ screen, properties: mergedProperties });
+  }
 };
 
 const sendCustomEvent = (event: string, properties: PropertiesType): void => {
