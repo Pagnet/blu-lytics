@@ -64,4 +64,19 @@ describe('SentryProvider', () => {
       type: 'info',
     });
   });
+
+  it('dispatchScreenEvent should add breadcrumb with data when properties are provided', () => {
+    const screenName = 'credit_list_view';
+    const properties = { origin: 'home', campaign_name: 'black_friday' };
+
+    SentryProvider.screenEvent(screenName, properties);
+
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: 'screen',
+      message: screenName,
+      level: 'info',
+      type: 'info',
+      data: properties,
+    });
+  });
 });

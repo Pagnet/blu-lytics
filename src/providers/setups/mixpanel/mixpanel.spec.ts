@@ -56,4 +56,18 @@ describe('MixPanelProvider', () => {
     jest.runAllTimers();
     expect(mixpanel.track).toHaveBeenCalledWith(screen);
   });
+
+  test('dispatchScreenEvent should call mixpanel.track with screen and properties', () => {
+    const screen = 'credit_list_view';
+    const properties = {
+      origin: 'home',
+      campaign_name: 'black_friday',
+      opportunities_pagblu_count: 3,
+    };
+
+    MixPanelProvider.screenEvent(screen, properties);
+
+    jest.runAllTimers();
+    expect(mixpanel.track).toHaveBeenCalledWith(screen, { ...properties });
+  });
 });

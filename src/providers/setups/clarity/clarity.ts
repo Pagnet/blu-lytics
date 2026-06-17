@@ -22,7 +22,10 @@ const dispatchCustomEvent = (
 ): void => {
 };
 
-const dispatchScreenEvent = (screen: string): void => {
+const dispatchScreenEvent = (
+  screen: string,
+  properties?: PropertiesType,
+): void => {
 };
 
 const ClarityProvider: ProviderType = {

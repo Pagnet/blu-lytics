@@ -4,6 +4,6 @@ export type ProviderType = {
   name: 'Clarity' | 'Sentry' | 'FullStory' | 'MixPanel';
   userIdentification: (id: string, userProperties: any) => void;
   customEvent: (event: string, properties: PropertiesType) => void;
-  screenEvent: (screen: string) => void;
+  screenEvent: (screen: string, properties?: PropertiesType) => void;
   reset?: () => void;
 };

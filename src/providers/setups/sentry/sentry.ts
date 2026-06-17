@@ -35,12 +35,16 @@ const dispatchCustomEvent = (
   Sentry.addBreadcrumb(breadcrumb);
 };
 
-const dispatchScreenEvent = (screen: string): void => {
+const dispatchScreenEvent = (
+  screen: string,
+  properties?: PropertiesType,
+): void => {
   const breadcrumb = {
     category: 'screen',
     message: screen,
     level: Sentry.Severity.Info,
     type: 'info',
+    ...(properties ? { data: properties } : {}),
   };
   Sentry.addBreadcrumb(breadcrumb);
 };
