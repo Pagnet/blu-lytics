@@ -46,7 +46,7 @@ describe('Event dispatching functions', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Screen event: TestScreen');
   });
 
-  it('should dispatch sendScreenEvent without properties keeping the legacy log format', () => {
+  it('should dispatch sendScreenEvent without properties keeping the legacy log format when _bl_props is empty', () => {
     const consoleLogSpy = jest.spyOn(console, 'log');
 
     sendScreenEvent('TestScreen');
@@ -54,6 +54,17 @@ describe('Event dispatching functions', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Screen event: TestScreen');
     expect(consoleLogSpy).not.toHaveBeenCalledWith(
       expect.stringContaining('TestScreen - '),
+    );
+  });
+
+  it('should include defaultProperties in log when _bl_props has content and no explicit properties are passed', () => {
+    localStorage.setItem('_bl_props', JSON.stringify({ client_uuid: 'abc123' }));
+    const consoleLogSpy = jest.spyOn(console, 'log');
+
+    sendScreenEvent('home_view');
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[blu-lytics]: Screen event: home_view - {"client_uuid":"abc123"}',
     );
   });
 
@@ -80,12 +91,23 @@ describe('Event dispatching functions', () => {
       localStorage.removeItem('_bl_env');
     });
 
-    it('should call provider.screenEvent with only the screen when no properties are provided', () => {
+    it('should call provider.screenEvent with only the screen when no properties are provided and _bl_props is empty', () => {
       sendScreenEvent('TestScreen');
 
       expect(providersList[0].screenEvent).toHaveBeenCalledWith(
         'TestScreen',
         undefined,
+      );
+    });
+
+    it('should call provider.screenEvent with defaultProperties when _bl_props has content and no explicit properties are passed', () => {
+      localStorage.setItem('_bl_props', JSON.stringify({ client_uuid: 'abc123', is_economic_group: false }));
+
+      sendScreenEvent('home_view');
+
+      expect(providersList[0].screenEvent).toHaveBeenCalledWith(
+        'home_view',
+        { client_uuid: 'abc123', is_economic_group: false },
       );
     });
 

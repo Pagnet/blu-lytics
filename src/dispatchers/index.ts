@@ -76,15 +76,6 @@ const sendScreenEvent = (
   screen: string,
   properties?: PropertiesType,
 ): void => {
-  if (!properties) {
-    if (getIsDevelopment()) {
-      console.log(`[blu-lytics]: Screen event: ${screen}`);
-    } else {
-      dispatchEventToAllProviders({ screen });
-    }
-    return;
-  }
-
   const rawStoredProperties = localStorage.getItem('_bl_props');
 
   if (rawStoredProperties) {
@@ -95,19 +86,20 @@ const sendScreenEvent = (
     }
   }
 
-  const mergedProperties = {
-    ...defaultProperties,
-    ...properties,
-  };
+  const mergedProperties = { ...defaultProperties, ...properties };
+  const hasProperties = Object.keys(mergedProperties).length > 0;
 
   if (getIsDevelopment()) {
     console.log(
-      `[blu-lytics]: Screen event: ${screen} - ${JSON.stringify(
-        mergedProperties,
-      )}`,
+      hasProperties
+        ? `[blu-lytics]: Screen event: ${screen} - ${JSON.stringify(mergedProperties)}`
+        : `[blu-lytics]: Screen event: ${screen}`,
     );
   } else {
-    dispatchEventToAllProviders({ screen, properties: mergedProperties });
+    dispatchEventToAllProviders({
+      screen,
+      ...(hasProperties ? { properties: mergedProperties } : {}),
+    });
   }
 };
 
