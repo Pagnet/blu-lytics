@@ -38,4 +38,13 @@ describe('FullStoryProvider', () => {
 
     expect(FullStory.event).toHaveBeenCalledWith(screen, {});
   });
+
+  it('dispatchScreenEvent should call FullStory.event with properties when provided', () => {
+    const screen = 'credit_list_view';
+    const properties = { origin: 'home', campaign_name: 'black_friday' };
+
+    FullStoryProvider.screenEvent(screen, properties);
+
+    expect(FullStory.event).toHaveBeenCalledWith(screen, { properties });
+  });
 });

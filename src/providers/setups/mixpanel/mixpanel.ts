@@ -48,10 +48,17 @@ const dispatchCustomEvent = (
   }
 };
 
-const dispatchScreenEvent = (screen: string): void => {
+const dispatchScreenEvent = (
+  screen: string,
+  properties?: PropertiesType,
+): void => {
   try {
     setTimeout(() => {
-      mixpanel.track(screen);
+      if (properties) {
+        mixpanel.track(screen, { ...properties });
+      } else {
+        mixpanel.track(screen);
+      }
     }, 1000);
   } catch (error) {
     console.error('Error tracking screen event:', error);

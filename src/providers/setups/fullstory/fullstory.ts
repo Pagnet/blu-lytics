@@ -23,8 +23,11 @@ const dispatchCustomEvent = (
   FullStory.event(event, { properties });
 };
 
-const dispatchScreenEvent = (screen: string): void => {
-  FullStory.event(screen, {});
+const dispatchScreenEvent = (
+  screen: string,
+  properties?: PropertiesType,
+): void => {
+  FullStory.event(screen, properties ? { properties } : {});
 };
 
 const FullStoryProvider: ProviderType = {
