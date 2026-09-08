@@ -130,6 +130,44 @@ describe('Event dispatching functions', () => {
     });
   });
 
+  describe('staging dispatch', () => {
+    beforeEach(() => {
+      localStorage.setItem('_bl_env', 'staging');
+      localStorage.removeItem('_bl_providers');
+    });
+
+    afterEach(() => {
+      localStorage.removeItem('_bl_env');
+    });
+
+    it('should only log sendUserIdentification without calling providers', () => {
+      const consoleLogSpy = jest.spyOn(console, 'log');
+
+      sendUserIdentification('123', { name: 'Name' });
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: User identification: 123 - {"name":"Name"}');
+      expect(providersList[0].userIdentification).not.toHaveBeenCalled();
+    });
+
+    it('should only log sendScreenEvent without calling providers', () => {
+      const consoleLogSpy = jest.spyOn(console, 'log');
+
+      sendScreenEvent('TestScreen');
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Screen event: TestScreen');
+      expect(providersList[0].screenEvent).not.toHaveBeenCalled();
+    });
+
+    it('should only log sendCustomEvent without calling providers', () => {
+      const consoleLogSpy = jest.spyOn(console, 'log');
+
+      sendCustomEvent('TestEvent', { prop1: 'value1' });
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Custom event: TestEvent - {"prop1":"value1"}');
+      expect(providersList[0].customEvent).not.toHaveBeenCalled();
+    });
+  });
+
   it('should be dispatch sendCustomEvent', () => {
     const consoleLogSpy = jest.spyOn(console, 'log');
 
