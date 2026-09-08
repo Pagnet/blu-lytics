@@ -51,7 +51,7 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
 
 const getIsDevelopment = (): boolean => {
   const currentEnvironment = localStorage.getItem('_bl_env') || 'development';
-  return currentEnvironment === 'development';
+  return currentEnvironment !== 'production';
 };
 
 const saveDefaultPropertiesToLocalStorage = (
