@@ -17,7 +17,18 @@ jest.mock('../providers', () => ({
       customEvent: jest.fn(),
       userIdentification: jest.fn(),
     },
+    {
+      name: 'Statsig',
+      screenEvent: jest.fn(),
+      customEvent: jest.fn(),
+      userIdentification: jest.fn(),
+    },
   ],
+}));
+
+const statsigStaging = { enabled: false };
+jest.mock('../providers/setups/statsig/statsig', () => ({
+  isStatsigEnabledInStaging: () => statsigStaging.enabled,
 }));
 
 jest.mock('../utils', () => ({
@@ -165,6 +176,70 @@ describe('Event dispatching functions', () => {
 
       expect(consoleLogSpy).toHaveBeenCalledWith('[blu-lytics]: Custom event: TestEvent - {"prop1":"value1"}');
       expect(providersList[0].customEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not call Statsig in staging when sendInStaging is off', () => {
+      sendCustomEvent('TestEvent', { prop1: 'value1' });
+      sendScreenEvent('TestScreen');
+      sendUserIdentification('123', { name: 'Name' });
+
+      expect(providersList[1].customEvent).not.toHaveBeenCalled();
+      expect(providersList[1].screenEvent).not.toHaveBeenCalled();
+      expect(providersList[1].userIdentification).not.toHaveBeenCalled();
+    });
+
+    describe('with Statsig enabled in staging', () => {
+      beforeEach(() => {
+        statsigStaging.enabled = true;
+      });
+
+      afterEach(() => {
+        statsigStaging.enabled = false;
+      });
+
+      it('should dispatch only to Statsig, keeping other providers silent', () => {
+        localStorage.setItem('_bl_props', JSON.stringify({ client_uuid: 'abc' }));
+
+        sendCustomEvent('TestEvent', { prop1: 'value1' });
+        sendScreenEvent('TestScreen');
+        sendUserIdentification('123', { name: 'Name' });
+
+        expect(providersList[1].customEvent).toHaveBeenCalledWith('TestEvent', {
+          client_uuid: 'abc',
+          prop1: 'value1',
+        });
+        expect(providersList[1].screenEvent).toHaveBeenCalledWith('TestScreen', {
+          client_uuid: 'abc',
+        });
+        expect(providersList[1].userIdentification).toHaveBeenCalledWith('123', {
+          name: 'Name',
+        });
+        expect(providersList[0].customEvent).not.toHaveBeenCalled();
+        expect(providersList[0].screenEvent).not.toHaveBeenCalled();
+        expect(providersList[0].userIdentification).not.toHaveBeenCalled();
+      });
+
+      it('should not dispatch to Statsig in development even when enabled', () => {
+        localStorage.setItem('_bl_env', 'development');
+
+        sendCustomEvent('TestEvent', { prop1: 'value1' });
+
+        expect(providersList[1].customEvent).not.toHaveBeenCalled();
+      });
+
+      it('should swallow Statsig errors in staging', () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        (providersList[1].customEvent as jest.Mock).mockImplementationOnce(() => {
+          throw new Error('boom');
+        });
+
+        expect(() => sendCustomEvent('TestEvent', { prop1: 'value1' })).not.toThrow();
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '[blu-lytics][Statsig] Failed to dispatch in staging',
+          expect.any(Error),
+        );
+        consoleErrorSpy.mockRestore();
+      });
     });
   });
 

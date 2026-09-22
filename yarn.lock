@@ -1397,6 +1397,18 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@statsig/client-core@3.33.5":
+  version "3.33.5"
+  resolved "https://registry.yarnpkg.com/@statsig/client-core/-/client-core-3.33.5.tgz#f9d7f62e88dd2a52195e76b66565db3bc7098856"
+  integrity sha512-wGStmLCXMiZ2XYawLm/m8pgQS2NmYEvNXXhpsie/Hs06LKsnSHK3H15mkSCj5br+gut6K6GuU1U8mi2obQPYXg==
+
+"@statsig/js-client@3.33.5":
+  version "3.33.5"
+  resolved "https://registry.yarnpkg.com/@statsig/js-client/-/js-client-3.33.5.tgz#0830ca79feb976ac234d37331e0ba7f527744dc1"
+  integrity sha512-QOPoLJQQegNT+onF1fsV6YnR7X8t3Di9bOTLezlAfv6R46QzsuLz+6Oqk9P1n9lWGPhdXHnxUNRohradF9sN2w==
+  dependencies:
+    "@statsig/client-core" "3.33.5"
+
 "@tootallnate/once@2":
   version "2.0.0"
   resolved "https://registry.npmjs.org/@tootallnate/once/-/once-2.0.0.tgz"
