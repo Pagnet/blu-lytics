@@ -7,6 +7,10 @@ import { CaptureConsole } from '@sentry/integrations';
 import { clarity } from 'clarity-js';
 
 import { IInitializeParams, EnvironmentType } from './initializers.types';
+import {
+  configureStatsig,
+  StatsigOptionsType,
+} from '../providers/setups/statsig/statsig';
 
 /**
  * Checks if the environment is set to 'production'.
@@ -85,6 +89,29 @@ const mixPanelInitializer = (
 };
 
 /**
+ * Initializes Statsig in a web environment. Sends events in production and,
+ * only when `statsigOptions.sendInStaging` is true, in staging. Without an
+ * allowlist of events nothing is sent.
+ * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
+ * @param {string} apiKey - The Statsig client SDK key.
+ * @param {StatsigOptionsType} options - Allowlist of events and staging flag.
+ * @returns {void}
+ */
+
+const statsigInitializer = (
+  environment: EnvironmentType,
+  apiKey: string,
+  options?: StatsigOptionsType,
+): void => {
+  const isStagingAllowed =
+    environment === 'staging' && options?.sendInStaging === true;
+
+  if (isProduction(environment) || isStagingAllowed) {
+    configureStatsig(apiKey, environment, options);
+  }
+};
+
+/**
  * Initializes Sentry for error tracking in a web environment.
  * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
  * @param {string} dsn - The Sentry DSN (Data Source Name).
@@ -148,6 +175,7 @@ export const initializeProviders = (
       recordIdleTimeoutMs: number;
       recordMaskAllText: boolean;
     };
+    statsigOptions?: StatsigOptionsType;
   } = { environment: 'production' },
 ): void => {
   const { environment } = options;
@@ -167,6 +195,9 @@ export const initializeProviders = (
         break;
       case 'MixPanel':
         mixPanelInitializer(environment, apiKey, options.mixPanelOptions);
+        break;
+      case 'Statsig':
+        statsigInitializer(environment, apiKey, options.statsigOptions);
         break;
       default:
         break;

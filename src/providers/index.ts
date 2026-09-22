@@ -3,6 +3,7 @@ import SentryProvider from './setups/sentry/sentry';
 import MixPanelProvider from './setups/mixpanel/mixpanel';
 import FullStoryProvider from './setups/fullstory/fullstory';
 import ClarityProvider from './setups/clarity/clarity';
+import StatsigProvider from './setups/statsig/statsig';
 
 /**
  * An array containing the default provider(s).
@@ -12,6 +13,7 @@ const providersDefault: ProviderType[] = [
   MixPanelProvider,
   FullStoryProvider,
   ClarityProvider,
+  StatsigProvider,
 ];
 /**
  * An array containing the list of providers, initialized with the default provider(s).

@@ -6,6 +6,7 @@ import {
   UserPropertiesType,
 } from './dispatchers.types';
 import { checkIfMixPanelIsInitialized } from '../utils';
+import { isStatsigEnabledInStaging } from '../providers/setups/statsig/statsig';
 
 /**
  * Dispatches the specified event data to all configured providers.
@@ -54,6 +55,33 @@ const getIsDevelopment = (): boolean => {
   return currentEnvironment !== 'production';
 };
 
+/**
+ * Outside production nothing is sent, except to Statsig when the current
+ * environment is staging and it was initialized with `sendInStaging: true`.
+ * No other provider receives events in this branch.
+ */
+const dispatchEventToStatsigInStaging = (eventData: EventData): void => {
+  if (localStorage.getItem('_bl_env') !== 'staging') return;
+  if (!isStatsigEnabledInStaging()) return;
+
+  const provider = providersList.find((item) => item.name === 'Statsig');
+  if (!provider) return;
+
+  try {
+    if (eventData.screen) {
+      provider.screenEvent(eventData.screen, eventData.properties);
+    }
+    if (eventData.event && eventData.properties) {
+      provider.customEvent(eventData.event, eventData.properties);
+    }
+    if (eventData.id && eventData.userProperties) {
+      provider.userIdentification(eventData.id, eventData.userProperties);
+    }
+  } catch (error) {
+    console.error('[blu-lytics][Statsig] Failed to dispatch in staging', error);
+  }
+};
+
 const saveDefaultPropertiesToLocalStorage = (
   properties: PropertiesType,
 ): void => {
@@ -95,6 +123,10 @@ const sendScreenEvent = (
         ? `[blu-lytics]: Screen event: ${screen} - ${JSON.stringify(mergedProperties)}`
         : `[blu-lytics]: Screen event: ${screen}`,
     );
+    dispatchEventToStatsigInStaging({
+      screen,
+      ...(hasProperties ? { properties: mergedProperties } : {}),
+    });
   } else {
     dispatchEventToAllProviders({
       screen,
@@ -125,6 +157,7 @@ const sendCustomEvent = (event: string, properties: PropertiesType): void => {
         mergedProperties,
       )}`,
     );
+    dispatchEventToStatsigInStaging({ event, properties: mergedProperties });
   } else {
     dispatchEventToAllProviders({ event, properties: mergedProperties });
   }
@@ -140,6 +173,7 @@ const sendUserIdentification = (
         userProperties,
       )}`,
     );
+    dispatchEventToStatsigInStaging({ id, userProperties });
   } else {
     dispatchEventToAllProviders({ id, userProperties });
   }
