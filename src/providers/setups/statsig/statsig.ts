@@ -1,11 +1,21 @@
 import { StatsigClient, StatsigUser } from '@statsig/js-client';
+import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
 import { PropertiesType } from '../../../dispatchers/dispatchers.types';
 import { ProviderType } from '../../provider.types';
+
+export type StatsigSessionReplayOptionsType = {
+  enabled: boolean;
+  autoStartRecording?: boolean;
+  keepRollingWindow?: boolean;
+  unmaskSelector?: string;
+  blockSelector?: string;
+};
 
 export type StatsigOptionsType = {
   events: string[];
   sendInStaging?: boolean;
   userIdProperty?: string;
+  sessionReplay?: StatsigSessionReplayOptionsType;
 };
 
 type StatsigState = {
@@ -17,7 +27,13 @@ type StatsigState = {
   auxiliaryUserId: string | null;
 };
 
+type TriggeredSessionReplayOptions = NonNullable<
+  Parameters<typeof runStatsigTriggeredSessionReplay>[1]
+>;
+
 const LOG_PREFIX = '[blu-lytics][Statsig]';
+export const SESSION_REPLAY_UNMASK_SELECTOR = '[data-replay-unmask]';
+export const SESSION_REPLAY_BLOCK_SELECTOR = '[data-replay-block]';
 
 const state: StatsigState = {
   client: null,
@@ -120,6 +136,50 @@ const dispatchReset = (): void => {
   state.auxiliaryUserId = null;
 };
 
+const maskText = (text: string): string => text.replace(/\S/g, '*');
+
+/**
+ * Privacy-first defaults for the recorder: every text node and every input is
+ * masked unless it is inside `unmaskSelector`; anything inside `blockSelector`
+ * is replaced by a placeholder of the same size. Console selector rules with a
+ * baseline other than "Passwords" override these options.
+ */
+export const buildSessionReplayConfig = (
+  options: StatsigSessionReplayOptionsType,
+): TriggeredSessionReplayOptions => {
+  const unmaskSelector = options.unmaskSelector || SESSION_REPLAY_UNMASK_SELECTOR;
+  const blockSelector = options.blockSelector || SESSION_REPLAY_BLOCK_SELECTOR;
+
+  return {
+    autoStartRecording: options.autoStartRecording === true,
+    keepRollingWindow: options.keepRollingWindow !== false,
+    rrwebConfig: {
+      blockSelector,
+      maskAllInputs: true,
+      maskTextSelector: '*',
+      maskTextFn: (text: string, element: HTMLElement | null): string => (
+        element?.closest(unmaskSelector) ? text : maskText(text)
+      ),
+      maskInputFn: (text: string, element: HTMLElement): string => (
+        element?.closest(unmaskSelector) ? text : maskText(text)
+      ),
+    },
+  };
+};
+
+const startSessionReplay = (
+  client: StatsigClient,
+  options?: StatsigSessionReplayOptionsType,
+): void => {
+  if (!options?.enabled) return;
+
+  try {
+    runStatsigTriggeredSessionReplay(client, buildSessionReplayConfig(options));
+  } catch (error) {
+    logError('Failed to start session replay', error);
+  }
+};
+
 const flush = (): void => {
   state.client?.flush().catch((error) => {
     logError('Failed to flush events', error);
@@ -145,15 +205,18 @@ export const configureStatsig = (
   if (!apiKey || state.allowedEvents.size === 0) return;
 
   try {
+    const initialClientUuid = readClientUuid();
     const client = new StatsigClient(
       apiKey,
-      {},
+      initialClientUuid ? buildUser(initialClientUuid) : {},
       { environment: { tier } },
     );
+    startSessionReplay(client, options?.sessionReplay);
     client.initializeAsync().catch((error) => {
       logError('Failed to initialize', error);
     });
     state.client = client;
+    state.currentUserId = initialClientUuid;
 
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeunload', flush);

@@ -1,5 +1,7 @@
 import { StatsigClient } from '@statsig/js-client';
+import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
 import StatsigProvider, {
+  buildSessionReplayConfig,
   configureStatsig,
   isStatsigEnabledInStaging,
   isStatsigEvent,
@@ -15,6 +17,10 @@ const mockClient = {
 
 jest.mock('@statsig/js-client', () => ({
   StatsigClient: jest.fn(() => mockClient),
+}));
+
+jest.mock('@statsig/session-replay', () => ({
+  runStatsigTriggeredSessionReplay: jest.fn(),
 }));
 
 const ALLOWLIST = [
@@ -44,6 +50,23 @@ describe('StatsigProvider', () => {
       expect(mockClient.initializeAsync).toHaveBeenCalledTimes(1);
       expect(isStatsigEvent('pagblu_installments_offer_view')).toBe(true);
       expect(isStatsigEvent('charge_success')).toBe(false);
+    });
+
+    it('creates the client already identified when client_uuid is stored', () => {
+      setDefaultProps({ client_uuid: 'client-0' });
+
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      StatsigProvider.customEvent('pagblu_installments_offer_view', {
+        client_uuid: 'client-0',
+      });
+
+      expect(StatsigClient).toHaveBeenCalledWith(
+        'client-key',
+        { userID: 'client-0' },
+        { environment: { tier: 'production' } },
+      );
+      expect(mockClient.updateUserAsync).not.toHaveBeenCalled();
+      expect(mockClient.logEvent).toHaveBeenCalledTimes(1);
     });
 
     it('does not create the client without an api key', () => {
@@ -84,6 +107,93 @@ describe('StatsigProvider', () => {
 
       configureStatsig('', 'staging', { events: ALLOWLIST, sendInStaging: true });
       expect(isStatsigEnabledInStaging()).toBe(false);
+    });
+  });
+
+  describe('session replay', () => {
+    it('is not started unless explicitly enabled', () => {
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      configureStatsig('client-key', 'production', {
+        events: ALLOWLIST,
+        sessionReplay: { enabled: false },
+      });
+
+      expect(runStatsigTriggeredSessionReplay).not.toHaveBeenCalled();
+    });
+
+    it('starts the triggered recorder on the same client, before initialization', () => {
+      const order: string[] = [];
+      (runStatsigTriggeredSessionReplay as jest.Mock).mockImplementationOnce(() => order.push('replay'));
+      mockClient.initializeAsync.mockImplementationOnce(() => {
+        order.push('init');
+        return Promise.resolve();
+      });
+
+      configureStatsig('client-key', 'production', {
+        events: ALLOWLIST,
+        sessionReplay: { enabled: true },
+      });
+
+      expect(runStatsigTriggeredSessionReplay).toHaveBeenCalledWith(
+        mockClient,
+        expect.objectContaining({
+          autoStartRecording: false,
+          keepRollingWindow: true,
+        }),
+      );
+      expect(order).toEqual(['replay', 'init']);
+    });
+
+    it('masks every text and input by default and honours the unmask/block selectors', () => {
+      const { rrwebConfig } = buildSessionReplayConfig({ enabled: true });
+      if (!rrwebConfig?.maskTextFn || !rrwebConfig.maskInputFn) throw new Error('missing mask functions');
+
+      document.body.innerHTML = `
+        <div id="masked">Fulano 12.345.678/0001-90</div>
+        <div data-replay-unmask><span id="visible">Parcelar</span></div>
+      `;
+      const masked = document.getElementById('masked') as HTMLElement;
+      const visible = document.getElementById('visible') as HTMLElement;
+
+      expect(rrwebConfig.maskAllInputs).toBe(true);
+      expect(rrwebConfig.maskTextSelector).toBe('*');
+      expect(rrwebConfig.blockSelector).toBe('[data-replay-block]');
+      expect(rrwebConfig.maskTextFn('Fulano 12.345', masked)).toBe('****** ******');
+      expect(rrwebConfig.maskTextFn('Fulano', null)).toBe('******');
+      expect(rrwebConfig.maskTextFn('Parcelar', visible)).toBe('Parcelar');
+      expect(rrwebConfig.maskInputFn('R$ 10', masked)).toBe('** **');
+      expect(rrwebConfig.maskInputFn('R$ 10', visible)).toBe('R$ 10');
+    });
+
+    it('accepts custom selectors and recording flags', () => {
+      const config = buildSessionReplayConfig({
+        enabled: true,
+        autoStartRecording: true,
+        keepRollingWindow: false,
+        unmaskSelector: '.ok',
+        blockSelector: '.secret',
+      });
+
+      document.body.innerHTML = '<p class="ok"><b id="b">x</b></p>';
+      expect(config.autoStartRecording).toBe(true);
+      expect(config.keepRollingWindow).toBe(false);
+      expect(config.rrwebConfig?.blockSelector).toBe('.secret');
+      expect(config.rrwebConfig?.maskTextFn?.('x', document.getElementById('b'))).toBe('x');
+    });
+
+    it('never propagates recorder errors', () => {
+      (runStatsigTriggeredSessionReplay as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('rrweb down');
+      });
+
+      expect(() => configureStatsig('client-key', 'production', {
+        events: ALLOWLIST,
+        sessionReplay: { enabled: true },
+      })).not.toThrow();
+      expect(console.error).toHaveBeenCalled();
+
+      StatsigProvider.customEvent('pagblu_installments_offer_view', { client_uuid: 'client-1' });
+      expect(mockClient.logEvent).toHaveBeenCalledTimes(1);
     });
   });
 
