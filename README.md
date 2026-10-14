@@ -57,6 +57,15 @@ initializeProviders([
 ], {environment: 'development'});
 ```
 
+#### Statsig session replay
+Statsig only receives the events listed in `statsigOptions.events`. With `statsigOptions.sessionReplay: true`, the Statsig client also runs the triggered session replay (`@statsig/session-replay`): recordings start only through the triggers configured in the Statsig console (*Project Settings > Analytics & Session Replay*), and every text and input is masked on the client side.
+```js
+initializeProviders([{ providerName: 'Statsig', apiKey: 'client-key' }], {
+  environment: 'production',
+  statsigOptions: { events: ['transfer_accountlist_view'], sessionReplay: true },
+});
+```
+
 ### Method: `sendScreenEvent`
 This method sends a message that will be propagated and recorded in all tools that have been previously initialized through the initializeProviders method. To use it, only a string needs to be provided as a parameter.
 ```js

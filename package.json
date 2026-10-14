@@ -18,6 +18,7 @@
     "@sentry/react": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
     "@statsig/js-client": "3.33.5",
+    "@statsig/session-replay": "3.33.5",
     "clarity-js": "^0.7.32",
     "jest-environment-jsdom": "^29.7.0",
     "mixpanel-browser": "^2.58.0",
