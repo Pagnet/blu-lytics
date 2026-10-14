@@ -1,4 +1,5 @@
 import { StatsigClient } from '@statsig/js-client';
+import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
 import StatsigProvider, {
   configureStatsig,
   isStatsigEnabledInStaging,
@@ -15,6 +16,10 @@ const mockClient = {
 
 jest.mock('@statsig/js-client', () => ({
   StatsigClient: jest.fn(() => mockClient),
+}));
+
+jest.mock('@statsig/session-replay', () => ({
+  runStatsigTriggeredSessionReplay: jest.fn(),
 }));
 
 const ALLOWLIST = [
@@ -84,6 +89,65 @@ describe('StatsigProvider', () => {
 
       configureStatsig('', 'staging', { events: ALLOWLIST, sendInStaging: true });
       expect(isStatsigEnabledInStaging()).toBe(false);
+    });
+  });
+
+  describe('session replay', () => {
+    it('does not start session replay by default', () => {
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+
+      expect(runStatsigTriggeredSessionReplay).not.toHaveBeenCalled();
+    });
+
+    it('starts the triggered session replay with all text and inputs masked', () => {
+      configureStatsig('client-key', 'production', { events: ALLOWLIST, sessionReplay: true });
+
+      expect(runStatsigTriggeredSessionReplay).toHaveBeenCalledWith(mockClient, {
+        autoStartRecording: true,
+        keepRollingWindow: true,
+        rrwebConfig: { maskAllInputs: true, maskTextSelector: '*' },
+      });
+    });
+
+    it('identifies the user from _bl_props at startup when session replay is on', () => {
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      configureStatsig('client-key', 'production', { events: ALLOWLIST, sessionReplay: true });
+
+      expect(StatsigClient).toHaveBeenCalledWith(
+        'client-key',
+        { userID: 'client-1' },
+        { environment: { tier: 'production' } },
+      );
+      StatsigProvider.customEvent('pagblu_installments_offer_view', {});
+      expect(mockClient.updateUserAsync).not.toHaveBeenCalled();
+      expect(mockClient.logEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the anonymous startup user when session replay is off', () => {
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+
+      expect(StatsigClient).toHaveBeenCalledWith(
+        'client-key',
+        {},
+        { environment: { tier: 'production' } },
+      );
+    });
+
+    it('keeps sending events when session replay fails to start', () => {
+      (runStatsigTriggeredSessionReplay as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('boom');
+      });
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      configureStatsig('client-key', 'production', { events: ALLOWLIST, sessionReplay: true });
+      StatsigProvider.customEvent('pagblu_installments_offer_view', {});
+
+      expect(console.error).toHaveBeenCalled();
+      expect(mockClient.initializeAsync).toHaveBeenCalledTimes(1);
+      expect(mockClient.logEvent).toHaveBeenCalledTimes(1);
     });
   });
 

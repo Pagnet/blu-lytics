@@ -1,4 +1,5 @@
 import { StatsigClient, StatsigUser } from '@statsig/js-client';
+import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
 import { PropertiesType } from '../../../dispatchers/dispatchers.types';
 import { ProviderType } from '../../provider.types';
 
@@ -6,6 +7,7 @@ export type StatsigOptionsType = {
   events: string[];
   sendInStaging?: boolean;
   userIdProperty?: string;
+  sessionReplay?: boolean;
 };
 
 type StatsigState = {
@@ -18,6 +20,13 @@ type StatsigState = {
 };
 
 const LOG_PREFIX = '[blu-lytics][Statsig]';
+
+// Session replay masks every text and input on the client side, regardless of the
+// privacy settings in the Statsig console.
+const SESSION_REPLAY_RRWEB_CONFIG = {
+  maskAllInputs: true,
+  maskTextSelector: '*',
+};
 
 const state: StatsigState = {
   client: null,
@@ -120,6 +129,18 @@ const dispatchReset = (): void => {
   state.auxiliaryUserId = null;
 };
 
+const startSessionReplay = (client: StatsigClient): void => {
+  try {
+    runStatsigTriggeredSessionReplay(client, {
+      autoStartRecording: true,
+      keepRollingWindow: true,
+      rrwebConfig: SESSION_REPLAY_RRWEB_CONFIG,
+    });
+  } catch (error) {
+    logError('Failed to start session replay', error);
+  }
+};
+
 const flush = (): void => {
   state.client?.flush().catch((error) => {
     logError('Failed to flush events', error);
@@ -129,7 +150,9 @@ const flush = (): void => {
 /**
  * Configures the Statsig client. Fail-closed: without an api key, without a
  * non-empty allowlist of events or while the client is not created, nothing
- * is sent.
+ * is sent. With `sessionReplay`, recordings start only through the triggers
+ * configured in the Statsig console, with all text masked, and the user is
+ * identified at startup from `_bl_props` so the targeting gate can evaluate it.
  */
 export const configureStatsig = (
   apiKey: string,
@@ -145,11 +168,14 @@ export const configureStatsig = (
   if (!apiKey || state.allowedEvents.size === 0) return;
 
   try {
+    const initialUserId = options?.sessionReplay ? readClientUuid() : null;
     const client = new StatsigClient(
       apiKey,
-      {},
+      initialUserId ? buildUser(initialUserId) : {},
       { environment: { tier } },
     );
+    state.currentUserId = initialUserId;
+    if (options?.sessionReplay) startSessionReplay(client);
     client.initializeAsync().catch((error) => {
       logError('Failed to initialize', error);
     });
