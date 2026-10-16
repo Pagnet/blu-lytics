@@ -66,6 +66,12 @@ initializeProviders([{ providerName: 'Statsig', apiKey: 'client-key' }], {
 });
 ```
 
+### Method: `checkGate`
+Evaluates a Statsig gate on the client for the current `client_uuid` (from `_bl_props`), after the SDK loads the values for that user. Resolves to `false` when Statsig is not initialized, without `client_uuid` or on any error. The evaluation logs the client-side exposure, which is what fires the session replay triggers by gate configured in the console.
+```js
+const enabled = await checkGate('frequent_payees_transfer');
+```
+
 ### Method: `sendScreenEvent`
 This method sends a message that will be propagated and recorded in all tools that have been previously initialized through the initializeProviders method. To use it, only a string needs to be provided as a parameter.
 ```js

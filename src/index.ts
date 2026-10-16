@@ -6,3 +6,4 @@ export {
   setDefaultProperties,
   resetMixpanel,
 } from './dispatchers';
+export { checkStatsigGate as checkGate } from './providers/setups/statsig/statsig';

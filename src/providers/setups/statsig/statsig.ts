@@ -17,6 +17,7 @@ type StatsigState = {
   userIdProperty: string;
   currentUserId: string | null;
   auxiliaryUserId: string | null;
+  ready: Promise<unknown> | null;
 };
 
 const LOG_PREFIX = '[blu-lytics][Statsig]';
@@ -35,6 +36,7 @@ const state: StatsigState = {
   userIdProperty: 'client_uuid',
   currentUserId: null,
   auxiliaryUserId: null,
+  ready: null,
 };
 
 const logError = (message: string, error?: unknown): void => {
@@ -70,7 +72,7 @@ const ensureUser = (clientUuid: string): boolean => {
   if (state.currentUserId === clientUuid) return true;
 
   state.currentUserId = clientUuid;
-  state.client.updateUserAsync(buildUser(clientUuid)).catch((error) => {
+  state.ready = state.client.updateUserAsync(buildUser(clientUuid)).catch((error) => {
     logError('Failed to update user', error);
   });
   return true;
@@ -141,6 +143,25 @@ const startSessionReplay = (client: StatsigClient): void => {
   }
 };
 
+/**
+ * Evaluates a gate on the client for the current client_uuid, after the SDK
+ * finishes loading the values for that user. Fail-closed: without the client,
+ * without client_uuid or on any error, resolves to false. The evaluation emits
+ * the client-side exposure that fires the session replay triggers by gate.
+ */
+export const checkStatsigGate = async (gate: string): Promise<boolean> => {
+  try {
+    const clientUuid = readClientUuid();
+    if (!clientUuid || !ensureUser(clientUuid)) return false;
+
+    await state.ready;
+    return state.client?.checkGate(gate) === true;
+  } catch (error) {
+    logError(`Failed to check gate ${gate}`, error);
+    return false;
+  }
+};
+
 const flush = (): void => {
   state.client?.flush().catch((error) => {
     logError('Failed to flush events', error);
@@ -161,6 +182,7 @@ export const configureStatsig = (
 ): void => {
   state.client = null;
   state.currentUserId = null;
+  state.ready = null;
   state.allowedEvents = new Set(options?.events || []);
   state.sendInStaging = options?.sendInStaging === true;
   state.userIdProperty = options?.userIdProperty || 'client_uuid';
@@ -176,7 +198,7 @@ export const configureStatsig = (
     );
     state.currentUserId = initialUserId;
     if (options?.sessionReplay) startSessionReplay(client);
-    client.initializeAsync().catch((error) => {
+    state.ready = client.initializeAsync().catch((error) => {
       logError('Failed to initialize', error);
     });
     state.client = client;
@@ -201,6 +223,7 @@ export const resetStatsigForTests = (): void => {
   state.userIdProperty = 'client_uuid';
   state.currentUserId = null;
   state.auxiliaryUserId = null;
+  state.ready = null;
 };
 
 const StatsigProvider: ProviderType = {
