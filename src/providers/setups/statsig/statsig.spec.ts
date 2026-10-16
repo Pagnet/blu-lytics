@@ -1,6 +1,7 @@
 import { StatsigClient } from '@statsig/js-client';
 import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
 import StatsigProvider, {
+  checkStatsigGate,
   configureStatsig,
   isStatsigEnabledInStaging,
   isStatsigEvent,
@@ -11,6 +12,7 @@ const mockClient = {
   initializeAsync: jest.fn(() => Promise.resolve()),
   updateUserAsync: jest.fn(() => Promise.resolve()),
   logEvent: jest.fn(),
+  checkGate: jest.fn(() => true),
   flush: jest.fn(() => Promise.resolve()),
 };
 
@@ -287,6 +289,76 @@ describe('StatsigProvider', () => {
       expect(mockClient.updateUserAsync).toHaveBeenLastCalledWith({
         userID: 'client-1',
       });
+    });
+  });
+
+  describe('checkStatsigGate', () => {
+    it('evaluates the gate for the client_uuid after the user values load', async () => {
+      let finishUpdate: () => void = () => {};
+      mockClient.updateUserAsync.mockImplementationOnce(
+        () => new Promise<void>((resolve) => { finishUpdate = resolve; }),
+      );
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      const result = checkStatsigGate('frequent_payees_transfer');
+      await Promise.resolve();
+      expect(mockClient.updateUserAsync).toHaveBeenCalledWith({ userID: 'client-1' });
+      expect(mockClient.checkGate).not.toHaveBeenCalled();
+
+      finishUpdate();
+      await expect(result).resolves.toBe(true);
+      expect(mockClient.checkGate).toHaveBeenCalledWith('frequent_payees_transfer');
+    });
+
+    it('waits for the initialization when the user is already identified', async () => {
+      let finishInit: () => void = () => {};
+      mockClient.initializeAsync.mockImplementationOnce(
+        () => new Promise<void>((resolve) => { finishInit = resolve; }),
+      );
+      setDefaultProps({ client_uuid: 'client-1' });
+      configureStatsig('client-key', 'production', { events: ALLOWLIST, sessionReplay: true });
+
+      const result = checkStatsigGate('frequent_payees_transfer');
+      await Promise.resolve();
+      expect(mockClient.updateUserAsync).not.toHaveBeenCalled();
+      expect(mockClient.checkGate).not.toHaveBeenCalled();
+
+      finishInit();
+      await expect(result).resolves.toBe(true);
+    });
+
+    it('resolves to false when the gate does not pass', async () => {
+      mockClient.checkGate.mockReturnValueOnce(false);
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      await expect(checkStatsigGate('frequent_payees_transfer')).resolves.toBe(false);
+    });
+
+    it('resolves to false without the client', async () => {
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      await expect(checkStatsigGate('frequent_payees_transfer')).resolves.toBe(false);
+      expect(mockClient.checkGate).not.toHaveBeenCalled();
+    });
+
+    it('resolves to false without client_uuid', async () => {
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+
+      await expect(checkStatsigGate('frequent_payees_transfer')).resolves.toBe(false);
+      expect(mockClient.checkGate).not.toHaveBeenCalled();
+    });
+
+    it('never propagates SDK errors', async () => {
+      mockClient.checkGate.mockImplementationOnce(() => {
+        throw new Error('boom');
+      });
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      setDefaultProps({ client_uuid: 'client-1' });
+
+      await expect(checkStatsigGate('frequent_payees_transfer')).resolves.toBe(false);
+      expect(console.error).toHaveBeenCalled();
     });
   });
 });
