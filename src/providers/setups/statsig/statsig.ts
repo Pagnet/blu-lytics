@@ -1,6 +1,9 @@
 import { StatsigClient, StatsigUser } from '@statsig/js-client';
 import { runStatsigTriggeredSessionReplay } from '@statsig/session-replay';
-import { PropertiesType } from '../../../dispatchers/dispatchers.types';
+import {
+  DispatchOptionsType,
+  PropertiesType,
+} from '../../../dispatchers/dispatchers.types';
 import { ProviderType } from '../../provider.types';
 
 export type StatsigOptionsType = {
@@ -87,12 +90,17 @@ const toMetadata = (properties?: PropertiesType): Record<string, string> => {
   return metadata;
 };
 
+const isAllowed = (event: string, options?: DispatchOptionsType): boolean => (
+  options?.statsig === true || state.allowedEvents.has(event)
+);
+
 const dispatchAllowedEvent = (
   event: string,
   properties?: PropertiesType,
+  options?: DispatchOptionsType,
 ): void => {
   try {
-    if (!state.client || !state.allowedEvents.has(event)) return;
+    if (!state.client || !isAllowed(event, options)) return;
 
     const clientUuid = readClientUuid(properties);
     if (!clientUuid || !ensureUser(clientUuid)) return;
@@ -119,12 +127,14 @@ const dispatchUserIdentification = (id: string): void => {
 const dispatchCustomEvent = (
   event: string,
   properties: PropertiesType,
-): void => dispatchAllowedEvent(event, properties);
+  options?: DispatchOptionsType,
+): void => dispatchAllowedEvent(event, properties, options);
 
 const dispatchScreenEvent = (
   screen: string,
   properties?: PropertiesType,
-): void => dispatchAllowedEvent(screen, properties);
+  options?: DispatchOptionsType,
+): void => dispatchAllowedEvent(screen, properties, options);
 
 const dispatchReset = (): void => {
   state.currentUserId = null;
@@ -169,9 +179,10 @@ const flush = (): void => {
 };
 
 /**
- * Configures the Statsig client. Fail-closed: without an api key, without a
- * non-empty allowlist of events or while the client is not created, nothing
- * is sent. With `sessionReplay`, recordings start only through the triggers
+ * Configures the Statsig client. Fail-closed: without an api key or while the
+ * client is not created, nothing is sent. An event is sent only when it is in
+ * `options.events` or when the caller passes `{ statsig: true }`.
+ * With `sessionReplay`, recordings start only through the triggers
  * configured in the Statsig console, with all text masked, and the user is
  * identified at startup from `_bl_props` so the targeting gate can evaluate it.
  */
@@ -187,7 +198,7 @@ export const configureStatsig = (
   state.sendInStaging = options?.sendInStaging === true;
   state.userIdProperty = options?.userIdProperty || 'client_uuid';
 
-  if (!apiKey || state.allowedEvents.size === 0) return;
+  if (!apiKey) return;
 
   try {
     const initialUserId = options?.sessionReplay ? readClientUuid() : null;

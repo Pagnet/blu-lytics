@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { providersList } from '../providers';
 import {
+  DispatchOptionsType,
   EventData,
   PropertiesType,
   UserPropertiesType,
@@ -32,12 +33,16 @@ export const dispatchEventToAllProviders = (eventData: EventData): void => {
         screenEvent: () =>
           provider.screenEvent &&
           eventData.screen &&
-          provider.screenEvent(eventData.screen, eventData.properties),
+          (eventData.options
+            ? provider.screenEvent(eventData.screen, eventData.properties, eventData.options)
+            : provider.screenEvent(eventData.screen, eventData.properties)),
         customEvent: () =>
           provider.customEvent &&
           eventData.event &&
           eventData.properties &&
-          provider.customEvent(eventData.event, eventData.properties),
+          (eventData.options
+            ? provider.customEvent(eventData.event, eventData.properties, eventData.options)
+            : provider.customEvent(eventData.event, eventData.properties)),
         userIdentification: () =>
           provider.userIdentification &&
           eventData.id &&
@@ -69,10 +74,18 @@ const dispatchEventToStatsigInStaging = (eventData: EventData): void => {
 
   try {
     if (eventData.screen) {
-      provider.screenEvent(eventData.screen, eventData.properties);
+      if (eventData.options) {
+        provider.screenEvent(eventData.screen, eventData.properties, eventData.options);
+      } else {
+        provider.screenEvent(eventData.screen, eventData.properties);
+      }
     }
     if (eventData.event && eventData.properties) {
-      provider.customEvent(eventData.event, eventData.properties);
+      if (eventData.options) {
+        provider.customEvent(eventData.event, eventData.properties, eventData.options);
+      } else {
+        provider.customEvent(eventData.event, eventData.properties);
+      }
     }
     if (eventData.id && eventData.userProperties) {
       provider.userIdentification(eventData.id, eventData.userProperties);
@@ -100,9 +113,15 @@ const setDefaultProperties = (properties: PropertiesType): void => {
   saveDefaultPropertiesToLocalStorage(defaultProperties);
 };
 
+/**
+ * `options.statsig: true` also sends the event to Statsig, besides the events
+ * allowed by the `statsigOptions.events` list. The default sends only to the
+ * other providers, as before.
+ */
 const sendScreenEvent = (
   screen: string,
   properties?: PropertiesType,
+  options?: DispatchOptionsType,
 ): void => {
   const rawStoredProperties = localStorage.getItem('_bl_props');
 
@@ -126,16 +145,25 @@ const sendScreenEvent = (
     dispatchEventToStatsigInStaging({
       screen,
       ...(hasProperties ? { properties: mergedProperties } : {}),
+      ...(options ? { options } : {}),
     });
   } else {
     dispatchEventToAllProviders({
       screen,
       ...(hasProperties ? { properties: mergedProperties } : {}),
+      ...(options ? { options } : {}),
     });
   }
 };
 
-const sendCustomEvent = (event: string, properties: PropertiesType): void => {
+/**
+ * `options.statsig: true` also sends the event to Statsig (see sendScreenEvent).
+ */
+const sendCustomEvent = (
+  event: string,
+  properties: PropertiesType,
+  options?: DispatchOptionsType,
+): void => {
   const rawStoredProperties = localStorage.getItem('_bl_props');
 
   if (rawStoredProperties) {
@@ -157,9 +185,17 @@ const sendCustomEvent = (event: string, properties: PropertiesType): void => {
         mergedProperties,
       )}`,
     );
-    dispatchEventToStatsigInStaging({ event, properties: mergedProperties });
+    dispatchEventToStatsigInStaging({
+      event,
+      properties: mergedProperties,
+      ...(options ? { options } : {}),
+    });
   } else {
-    dispatchEventToAllProviders({ event, properties: mergedProperties });
+    dispatchEventToAllProviders({
+      event,
+      properties: mergedProperties,
+      ...(options ? { options } : {}),
+    });
   }
 };
 
