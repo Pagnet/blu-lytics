@@ -59,11 +59,20 @@ describe('StatsigProvider', () => {
       expect(StatsigClient).not.toHaveBeenCalled();
     });
 
-    it('does not create the client without an allowlist', () => {
+    it('creates the client without an allowlist but sends only opted-in events', () => {
       configureStatsig('client-key', 'production', { events: [] });
-      configureStatsig('client-key', 'production', undefined);
 
-      expect(StatsigClient).not.toHaveBeenCalled();
+      expect(StatsigClient).toHaveBeenCalledTimes(1);
+
+      StatsigProvider.customEvent('transfer_accountlist_action', { client_uuid: 'client-1' });
+      expect(mockClient.logEvent).not.toHaveBeenCalled();
+
+      StatsigProvider.customEvent(
+        'transfer_accountlist_action',
+        { client_uuid: 'client-1' },
+        { statsig: true },
+      );
+      expect(mockClient.logEvent).toHaveBeenCalledTimes(1);
     });
 
     it('never propagates an error thrown while creating the client', () => {
@@ -201,6 +210,36 @@ describe('StatsigProvider', () => {
         undefined,
         { client_uuid: 'client-1', eligible: 'true', eligible_count: '3' },
       );
+    });
+
+    it('logs events outside the allowlist when the caller opts in with statsig: true', () => {
+      StatsigProvider.customEvent(
+        'transfer_accountlist_action',
+        { client_uuid: 'client-1', action: 'select_contact' },
+        { statsig: true },
+      );
+      StatsigProvider.screenEvent(
+        'transfer_accountlist_view',
+        { client_uuid: 'client-1' },
+        { statsig: true },
+      );
+
+      expect(mockClient.logEvent).toHaveBeenCalledWith(
+        'transfer_accountlist_action',
+        undefined,
+        { client_uuid: 'client-1', action: 'select_contact' },
+      );
+      expect(mockClient.logEvent).toHaveBeenCalledWith(
+        'transfer_accountlist_view',
+        undefined,
+        { client_uuid: 'client-1' },
+      );
+    });
+
+    it('ignores events outside the allowlist when statsig is false or absent', () => {
+      StatsigProvider.customEvent('charge_success', { client_uuid: 'client-1' }, { statsig: false });
+
+      expect(mockClient.logEvent).not.toHaveBeenCalled();
     });
 
     it('ignores events outside the allowlist', () => {

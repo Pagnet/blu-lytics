@@ -122,6 +122,22 @@ describe('Event dispatching functions', () => {
       );
     });
 
+    it('should pass the statsig option through to the providers', () => {
+      sendScreenEvent('transfer_accountlist_view', { origin: 'list' }, { statsig: true });
+      sendCustomEvent('transfer_accountlist_action', { action: 'select_contact' }, { statsig: true });
+
+      expect(providersList[0].screenEvent).toHaveBeenCalledWith(
+        'transfer_accountlist_view',
+        expect.objectContaining({ origin: 'list' }),
+        { statsig: true },
+      );
+      expect(providersList[0].customEvent).toHaveBeenCalledWith(
+        'transfer_accountlist_action',
+        expect.objectContaining({ action: 'select_contact' }),
+        { statsig: true },
+      );
+    });
+
     it('should call provider.screenEvent with the screen and merged properties', () => {
       localStorage.setItem('_bl_props', JSON.stringify({ origin: 'home' }));
 

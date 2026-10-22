@@ -5,10 +5,14 @@ export type UserPropertiesType = {
   name?: string;
   [key: string]: string | boolean | number | any[] | undefined;
 };
+export type DispatchOptionsType = {
+  statsig?: boolean;
+};
 export type EventData = {
   screen?: string;
   properties?: PropertiesType;
   event?: string;
   id?: string;
   userProperties?: UserPropertiesType;
+  options?: DispatchOptionsType;
 };
