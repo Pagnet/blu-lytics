@@ -63,10 +63,12 @@ const readClientUuid = (properties?: PropertiesType): string | null => {
   return typeof value === 'string' && value.length > 0 ? value : null;
 };
 
+// `customIDs.client_uuid` is the unit for gates with ID type `client_uuid`.
 const buildUser = (clientUuid: string): StatsigUser => ({
   userID: clientUuid,
+  customIDs: { client_uuid: clientUuid },
   ...(state.auxiliaryUserId
-    ? { customIDs: { userID: state.auxiliaryUserId } }
+    ? { custom: { user_id: state.auxiliaryUserId } }
     : {}),
 });
 

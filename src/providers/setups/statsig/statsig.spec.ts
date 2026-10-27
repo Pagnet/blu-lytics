@@ -127,7 +127,7 @@ describe('StatsigProvider', () => {
 
       expect(StatsigClient).toHaveBeenCalledWith(
         'client-key',
-        { userID: 'client-1' },
+        { userID: 'client-1', customIDs: { client_uuid: 'client-1' } },
         { environment: { tier: 'production' } },
       );
       StatsigProvider.customEvent('pagblu_installments_offer_view', {});
@@ -182,7 +182,8 @@ describe('StatsigProvider', () => {
       expect(mockClient.updateUserAsync).toHaveBeenCalledTimes(1);
       expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
         userID: 'client-1',
-        customIDs: { userID: '42' },
+        customIDs: { client_uuid: 'client-1' },
+        custom: { user_id: '42' },
       });
       expect(mockClient.logEvent).toHaveBeenCalledWith(
         'pagblu_installments_selection_open',
@@ -269,6 +270,7 @@ describe('StatsigProvider', () => {
 
       expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
         userID: 'client-2',
+        customIDs: { client_uuid: 'client-2' },
       });
       expect(mockClient.logEvent).toHaveBeenCalledWith(
         'pagblu_installments_offer_view',
@@ -293,7 +295,8 @@ describe('StatsigProvider', () => {
 
       expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
         userID: 'client-1',
-        customIDs: { userID: '42' },
+        customIDs: { client_uuid: 'client-1' },
+        custom: { user_id: '42' },
       });
     });
 
@@ -327,6 +330,7 @@ describe('StatsigProvider', () => {
 
       expect(mockClient.updateUserAsync).toHaveBeenLastCalledWith({
         userID: 'client-1',
+        customIDs: { client_uuid: 'client-1' },
       });
     });
   });
@@ -342,7 +346,7 @@ describe('StatsigProvider', () => {
 
       const result = checkStatsigGate('frequent_payees_transfer');
       await Promise.resolve();
-      expect(mockClient.updateUserAsync).toHaveBeenCalledWith({ userID: 'client-1' });
+      expect(mockClient.updateUserAsync).toHaveBeenCalledWith({ userID: 'client-1', customIDs: { client_uuid: 'client-1' } });
       expect(mockClient.checkGate).not.toHaveBeenCalled();
 
       finishUpdate();
