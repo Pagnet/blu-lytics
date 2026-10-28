@@ -6,11 +6,16 @@ import {
 } from '../../../dispatchers/dispatchers.types';
 import { ProviderType } from '../../provider.types';
 
+// Who goes in the Statsig `userID`: 'client' (default) = client_uuid; 'user' = the person.
+// `customIDs.client_uuid` always carries the client, for gates with ID type `client_uuid`.
+export type StatsigIdentityType = 'client' | 'user';
+
 export type StatsigOptionsType = {
   events: string[];
   sendInStaging?: boolean;
   userIdProperty?: string;
   sessionReplay?: boolean;
+  identity?: StatsigIdentityType;
 };
 
 type StatsigState = {
@@ -18,7 +23,8 @@ type StatsigState = {
   allowedEvents: Set<string>;
   sendInStaging: boolean;
   userIdProperty: string;
-  currentUserId: string | null;
+  identity: StatsigIdentityType;
+  currentUserKey: string | null;
   auxiliaryUserId: string | null;
   ready: Promise<unknown> | null;
 };
@@ -37,7 +43,8 @@ const state: StatsigState = {
   allowedEvents: new Set(),
   sendInStaging: false,
   userIdProperty: 'client_uuid',
-  currentUserId: null,
+  identity: 'client',
+  currentUserKey: null,
   auxiliaryUserId: null,
   ready: null,
 };
@@ -63,21 +70,35 @@ const readClientUuid = (properties?: PropertiesType): string | null => {
   return typeof value === 'string' && value.length > 0 ? value : null;
 };
 
-// `customIDs.client_uuid` is the unit for gates with ID type `client_uuid`.
-const buildUser = (clientUuid: string): StatsigUser => ({
-  userID: clientUuid,
-  customIDs: { client_uuid: clientUuid },
-  ...(state.auxiliaryUserId
-    ? { custom: { user_id: state.auxiliaryUserId } }
-    : {}),
-});
+const toId = (value: unknown): string | null => {
+  if (typeof value === 'number') return String(value);
+  return typeof value === 'string' && value.length > 0 ? value : null;
+};
 
-const ensureUser = (clientUuid: string): boolean => {
+// The person comes from `user_id` in the event or in `_bl_props` (survives a reload) and,
+// right after login, from the user identification.
+const readUserId = (properties?: PropertiesType): string | null => (
+  toId(properties?.user_id)
+  ?? toId(readDefaultProperties().user_id)
+  ?? state.auxiliaryUserId
+);
+
+const buildUser = (clientUuid: string, userId: string | null): StatsigUser => {
+  const unitId = state.identity === 'user' ? userId : clientUuid;
+  return {
+    ...(unitId ? { userID: unitId } : {}),
+    customIDs: { client_uuid: clientUuid },
+    ...(userId ? { custom: { user_id: userId } } : {}),
+  };
+};
+
+const ensureUser = (clientUuid: string, userId: string | null): boolean => {
   if (!state.client) return false;
-  if (state.currentUserId === clientUuid) return true;
+  const key = `${clientUuid}|${userId ?? ''}`;
+  if (state.currentUserKey === key) return true;
 
-  state.currentUserId = clientUuid;
-  state.ready = state.client.updateUserAsync(buildUser(clientUuid)).catch((error) => {
+  state.currentUserKey = key;
+  state.ready = state.client.updateUserAsync(buildUser(clientUuid, userId)).catch((error) => {
     logError('Failed to update user', error);
   });
   return true;
@@ -105,7 +126,7 @@ const dispatchAllowedEvent = (
     if (!state.client || !isAllowed(event, options)) return;
 
     const clientUuid = readClientUuid(properties);
-    if (!clientUuid || !ensureUser(clientUuid)) return;
+    if (!clientUuid || !ensureUser(clientUuid, readUserId(properties))) return;
 
     state.client.logEvent(event, undefined, toMetadata(properties));
   } catch (error) {
@@ -119,8 +140,7 @@ const dispatchUserIdentification = (id: string): void => {
     const clientUuid = readClientUuid();
     if (!clientUuid || !state.client) return;
 
-    state.currentUserId = null;
-    ensureUser(clientUuid);
+    ensureUser(clientUuid, readUserId());
   } catch (error) {
     logError('Failed to identify user', error);
   }
@@ -139,7 +159,7 @@ const dispatchScreenEvent = (
 ): void => dispatchAllowedEvent(screen, properties, options);
 
 const dispatchReset = (): void => {
-  state.currentUserId = null;
+  state.currentUserKey = null;
   state.auxiliaryUserId = null;
 };
 
@@ -164,7 +184,7 @@ const startSessionReplay = (client: StatsigClient): void => {
 export const checkStatsigGate = async (gate: string): Promise<boolean> => {
   try {
     const clientUuid = readClientUuid();
-    if (!clientUuid || !ensureUser(clientUuid)) return false;
+    if (!clientUuid || !ensureUser(clientUuid, readUserId())) return false;
 
     await state.ready;
     return state.client?.checkGate(gate) === true;
@@ -194,22 +214,24 @@ export const configureStatsig = (
   options?: StatsigOptionsType,
 ): void => {
   state.client = null;
-  state.currentUserId = null;
+  state.currentUserKey = null;
   state.ready = null;
   state.allowedEvents = new Set(options?.events || []);
   state.sendInStaging = options?.sendInStaging === true;
   state.userIdProperty = options?.userIdProperty || 'client_uuid';
+  state.identity = options?.identity === 'user' ? 'user' : 'client';
 
   if (!apiKey) return;
 
   try {
-    const initialUserId = options?.sessionReplay ? readClientUuid() : null;
+    const initialClientUuid = options?.sessionReplay ? readClientUuid() : null;
+    const initialUserId = initialClientUuid ? readUserId() : null;
     const client = new StatsigClient(
       apiKey,
-      initialUserId ? buildUser(initialUserId) : {},
+      initialClientUuid ? buildUser(initialClientUuid, initialUserId) : {},
       { environment: { tier } },
     );
-    state.currentUserId = initialUserId;
+    state.currentUserKey = initialClientUuid ? `${initialClientUuid}|${initialUserId ?? ''}` : null;
     if (options?.sessionReplay) startSessionReplay(client);
     state.ready = client.initializeAsync().catch((error) => {
       logError('Failed to initialize', error);
@@ -234,7 +256,8 @@ export const resetStatsigForTests = (): void => {
   state.allowedEvents = new Set();
   state.sendInStaging = false;
   state.userIdProperty = 'client_uuid';
-  state.currentUserId = null;
+  state.identity = 'client';
+  state.currentUserKey = null;
   state.auxiliaryUserId = null;
   state.ready = null;
 };

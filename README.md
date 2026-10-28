@@ -57,6 +57,16 @@ initializeProviders([
 ], {environment: 'development'});
 ```
 
+#### Statsig identity
+`statsigOptions.identity` decides who goes in the Statsig `userID`. `customIDs.client_uuid` always carries the client (from `_bl_props`), for gates with ID type `client_uuid`:
+```
+identity: 'client' (default)          identity: 'user'
+userID                = client_uuid   userID                = user_id (none without a person)
+customIDs.client_uuid = client_uuid   customIDs.client_uuid = client_uuid
+custom.user_id        = user_id       custom.user_id        = user_id
+```
+The person comes from `user_id` in `setDefaultProperties` (stored in `_bl_props`, survives a reload) or, right after login, from `sendUserIdentification`.
+
 #### Statsig session replay
 Statsig only receives the events listed in `statsigOptions.events`. With `statsigOptions.sessionReplay: true`, the Statsig client also runs the triggered session replay (`@statsig/session-replay`): recordings start only through the triggers configured in the Statsig console (*Project Settings > Analytics & Session Replay*), and every text and input is masked on the client side.
 ```js
