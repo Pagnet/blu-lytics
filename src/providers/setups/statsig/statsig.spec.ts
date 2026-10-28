@@ -335,6 +335,90 @@ describe('StatsigProvider', () => {
     });
   });
 
+  describe('identity', () => {
+    it('keeps the client as userID and sends the stored person in custom.user_id by default', () => {
+      configureStatsig('client-key', 'production', { events: ALLOWLIST });
+      setDefaultProps({ client_uuid: 'client-1', user_id: 42 });
+
+      StatsigProvider.customEvent('pagblu_installments_selection_open', {});
+
+      expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
+        userID: 'client-1',
+        customIDs: { client_uuid: 'client-1' },
+        custom: { user_id: '42' },
+      });
+    });
+
+    describe('with the user identity', () => {
+      beforeEach(() => {
+        configureStatsig('client-key', 'production', { events: ALLOWLIST, identity: 'user' });
+        jest.clearAllMocks();
+      });
+
+      it('sends the person as userID, keeping the client in customIDs.client_uuid', () => {
+        setDefaultProps({ client_uuid: 'client-1', user_id: '42' });
+
+        StatsigProvider.customEvent('pagblu_installments_selection_open', {});
+
+        expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
+          userID: '42',
+          customIDs: { client_uuid: 'client-1' },
+          custom: { user_id: '42' },
+        });
+      });
+
+      it('keeps the same person when the client changes', () => {
+        setDefaultProps({ client_uuid: 'client-1', user_id: '42' });
+        StatsigProvider.customEvent('pagblu_installments_selection_open', {});
+        setDefaultProps({ client_uuid: 'client-2', user_id: '42' });
+        StatsigProvider.customEvent('pagblu_installments_selection_open', {});
+
+        expect(mockClient.updateUserAsync).toHaveBeenCalledTimes(2);
+        expect(mockClient.updateUserAsync).toHaveBeenLastCalledWith({
+          userID: '42',
+          customIDs: { client_uuid: 'client-2' },
+          custom: { user_id: '42' },
+        });
+      });
+
+      it('uses the person from the login identification when _bl_props has none', () => {
+        setDefaultProps({ client_uuid: 'client-1' });
+
+        StatsigProvider.userIdentification('42', {});
+
+        expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
+          userID: '42',
+          customIDs: { client_uuid: 'client-1' },
+          custom: { user_id: '42' },
+        });
+      });
+
+      it('sends only the client in customIDs.client_uuid without a person', () => {
+        setDefaultProps({ client_uuid: 'client-1' });
+
+        StatsigProvider.customEvent('pagblu_installments_selection_open', {});
+
+        expect(mockClient.updateUserAsync).toHaveBeenCalledWith({
+          customIDs: { client_uuid: 'client-1' },
+        });
+      });
+    });
+
+    it('starts the session replay with the stored person after a reload', () => {
+      setDefaultProps({ client_uuid: 'client-1', user_id: '42' });
+
+      configureStatsig('client-key', 'production', {
+        events: ALLOWLIST, sessionReplay: true, identity: 'user',
+      });
+
+      expect(StatsigClient).toHaveBeenCalledWith(
+        'client-key',
+        { userID: '42', customIDs: { client_uuid: 'client-1' }, custom: { user_id: '42' } },
+        { environment: { tier: 'production' } },
+      );
+    });
+  });
+
   describe('checkStatsigGate', () => {
     it('evaluates the gate for the client_uuid after the user values load', async () => {
       let finishUpdate: () => void = () => {};
