@@ -13,7 +13,6 @@
     "coverage": "TZ=UTC+3 jest --coverage"
   },
   "dependencies": {
-    "@fullstory/browser": "1.7.0",
     "@sentry/integrations": "^6.19.7",
     "@sentry/react": "^6.19.7",
     "@sentry/tracing": "^6.19.7",

@@ -112,7 +112,6 @@ sendUserIdentification('user-id', {
 
 ## Supported tracking tools
 - Sentry
-- Fullstory
 - Mixpanel
 
 ## Incoming Updates

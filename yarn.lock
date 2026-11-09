@@ -470,11 +470,6 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.55.0.tgz"
   integrity sha512-qQfo2mxH5yVom1kacMtZZJFVdW+E70mqHMJvVg6WTLo+VBuQJ4TojZlfWBjK0ve5BdEeNAVxOsl/nvNMpJOaJA==
 
-"@fullstory/browser@1.7.0":
-  version "1.7.0"
-  resolved "https://registry.npmjs.org/@fullstory/browser/-/browser-1.7.0.tgz"
-  integrity sha512-O+3qAfKdi0lh4XgLK5fxm2Qk4VtkFh16D6yLa40dmuDMJSdhQT76P8eO7xyNgeB/L4FPWyEcPiUGh7NvEOq9Kw==
-
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.13"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.13.tgz"

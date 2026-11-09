@@ -1,7 +1,6 @@
 import { ProviderType } from './provider.types';
 import SentryProvider from './setups/sentry/sentry';
 import MixPanelProvider from './setups/mixpanel/mixpanel';
-import FullStoryProvider from './setups/fullstory/fullstory';
 import ClarityProvider from './setups/clarity/clarity';
 import StatsigProvider from './setups/statsig/statsig';
 
@@ -11,7 +10,6 @@ import StatsigProvider from './setups/statsig/statsig';
 const providersDefault: ProviderType[] = [
   SentryProvider,
   MixPanelProvider,
-  FullStoryProvider,
   ClarityProvider,
   StatsigProvider,
 ];

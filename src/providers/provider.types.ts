@@ -4,7 +4,7 @@ import {
 } from '../dispatchers/dispatchers.types';
 
 export type ProviderType = {
-  name: 'Clarity' | 'Sentry' | 'FullStory' | 'MixPanel' | 'Statsig';
+  name: 'Clarity' | 'Sentry' | 'MixPanel' | 'Statsig';
   userIdentification: (id: string, userProperties: any) => void;
   customEvent: (
     event: string,

@@ -1,6 +1,5 @@
 /* eslint-disable import/no-mutable-exports */
 import * as Sentry from '@sentry/react';
-import { init } from '@fullstory/browser';
 import mixpanel from 'mixpanel-browser';
 import { BrowserTracing } from '@sentry/tracing';
 import { CaptureConsole } from '@sentry/integrations';
@@ -39,24 +38,6 @@ const clarityInitializer = (
       content: true,
     });
     clarity.consent();
-  }
-};
-
-/**
- * Initializes FullStory for error tracking in a web environment.
- * @param {EnvironmentType} environment - The environment (e.g., 'production', 'development').
- * @param {string} orgId - The FullStory organization ID.
- * @returns {void}
- */
-
-const fullStoryInitializer = (
-  environment: EnvironmentType,
-  apiKey: string,
-): void => {
-  if (isProduction(environment)) {
-    init({ orgId: apiKey });
-  } else {
-    init({ orgId: apiKey, devMode: true });
   }
 };
 
@@ -186,9 +167,6 @@ export const initializeProviders = (
     switch (providerName) {
       case 'Clarity':
         clarityInitializer(environment, apiKey);
-        break;
-      case 'FullStory':
-        fullStoryInitializer(environment, apiKey);
         break;
       case 'Sentry':
         sentryInitializer(environment, apiKey, tracesSampleRate);
